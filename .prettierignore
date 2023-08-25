@@ -1,0 +1,4 @@
+node_modules
+/foundry
+/lib
+/nextjs/abi

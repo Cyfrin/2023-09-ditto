@@ -1,0 +1,17 @@
+# environment
+.DS_Store
+.secret
+.env
+
+# generated
+node_modules
+/foundry
+/interfaces
+/renamed
+.forge-snapshots
+.deploy-snapshots
+.signatures.json
+
+# coverage
+*.info
+coverage

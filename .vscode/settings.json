@@ -1,0 +1,19 @@
+{
+  // editor
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // solidity
+  "[solidity]": {
+    "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  "solidity.compileUsingRemoteVersion": "v0.8.21+commit.d9974bed",
+  "solidity.formatter": "forge",
+  // misc
+  "terminal.integrated.scrollback": 5000,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/package-lock.json": true
+  },
+  "solidity-metrics.file.exclusions.glob": "{**/node_modules,**/mock*,**/test*,**/migrations,**/Migrations.sol,**/console.sol,**/TestFacet.sol,**/governance/*.sol,**/UniswapOracleLibrary.sol,**/UniswapTickMath.sol,**/LibDiamond.sol,**/IDiamondLoupe.sol,**/IDiamondCut.sol}"
+}

@@ -1,0 +1,21 @@
+{
+  "statefulFuzz_NFT_NFTsHaveOnlyOneShortRecord()": 0,
+  "statefulFuzz_NFT_TokenIdOnlyIncreases()": 0,
+  "statefulFuzz_Vault_ErcEscrowedPlusAssetBalanceEqTotalDebt()": 0,
+  "statefulFuzz_Vault_ZethTotal()": 0,
+  "statefulFuzz_ZethTotalMatchesEthEscrowed()": 0,
+  "statefulFuzz_allOrderIdsUnique()": 0,
+  "statefulFuzz_askHEAD()": 0,
+  "statefulFuzz_bidHEAD()": 0,
+  "statefulFuzz_boundTest()": 0,
+  "statefulFuzz_dittoMatchedShares()": 0,
+  "statefulFuzz_oracleTimeAlwaysIncrease()": 0,
+  "statefulFuzz_orderIdGtMarketDepth()": 0,
+  "statefulFuzz_shortHEAD()": 0,
+  "statefulFuzz_shortRecordExists()": 0,
+  "statefulFuzz_sortedAsksLowestToHighest()": 0,
+  "statefulFuzz_sortedBidsHighestToLowest()": 0,
+  "statefulFuzz_sortedShortsLowestToHighest()": 0,
+  "statefulFuzz_startingShortPriceGteOraclePrice()": 0,
+  "statefulFuzz_zethTotal()": 1.5
+}

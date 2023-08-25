@@ -1,0 +1,17 @@
+{
+  "name": "sol-to-isol",
+  "version": "0.0.1",
+  "description": "Generates Solidity interfaces from Solidity contracts",
+  "main": "index.js",
+  "bin": {
+    "sol-to-isol": "bin.js"
+  },
+  "engines": {
+    "node": ">=16.14.0"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@solidity-parser/parser": "^0.16.0",
+    "crypto-js": "^4.1.1"
+  }
+}

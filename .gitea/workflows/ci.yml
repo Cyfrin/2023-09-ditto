@@ -1,0 +1,54 @@
+name: CI
+on: [push]
+jobs:
+  combinedTest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: Setup Bun
+        uses: https://github.com/oven-sh/setup-bun@v1
+        with:
+          bun-version: "0.7.1"
+
+      - run: bun install
+      - run: bun run lint
+      - run: bun run interfaces
+
+      - name: Install Foundry
+        uses: https://github.com/foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-ca67d15f4abd46394b324c50e21e66f306a1162d
+          cache: true
+
+      - name: Build contracts
+        run: forge build
+
+      - name: Build contracts for gas profile
+        run: FOUNDRY_PROFILE=gas forge build
+
+      - name: forge-test
+        env:
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+        run: FOUNDRY_PROFILE=default forge test --no-match-test statefulFuzz
+
+      - name: forge-test-gas
+        env:
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+        run: FOUNDRY_PROFILE=testgas forge test
+
+      - name: forge-test-deploy
+        env:
+          ANVIL_9_PRIVATE_KEY: ${{ secrets.ANVIL_9_PRIVATE_KEY }}
+        run: timeout 15s ./scripts/ci-anvil.sh
+
+      - run: bun run postdeploy-local
+      - run: bun run typescript
+
+      - name: forge-test-statefulFuzz
+        env:
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+        run: timeout 100s bun run invariant

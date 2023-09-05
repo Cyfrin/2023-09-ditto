@@ -52,6 +52,8 @@ Let's prioritize the core parts: orderbook functions (making orders: `createX`),
 - facets/DiamondCutFacet.sol
 - facets/DiamondLoupeFacet.sol
 
+# OrderBook
+
 ## Setup
 
 ```sh
@@ -67,8 +69,8 @@ foundryup
 # init/update submodules for forge-std
 forge install foundry-rs/forge-std
 git submodule update --init --recursive
-# setup .env file, change RPC url
-echo 'ANVIL_9_PRIVATE_KEY=0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6' > .env && echo 'MAINNET_RPC_URL=https://eth.llamarpc.com' >> .env
+# setup .env file
+echo 'ANVIL_9_PRIVATE_KEY=0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6' > .env && echo 'MAINNET_RPC_URL=http://192.168.11.134:8545' >> .env
 # disable next telemetry
 npx next telemetry disable
 ```
@@ -77,13 +79,6 @@ npx next telemetry disable
 # If needed, use volta to get node/npm, uses field in package.json
 curl https://get.volta.sh | bash
 volta install node
-```
-
-Solidity Metrics - https://marketplace.visualstudio.com/items?itemName=tintinweb.solidity-metrics
-
-```
-Right Click Contracts > Select Solidity Metrics
-(See .vscode/settings.json to see excluded files)
 ```
 
 ## Develop
@@ -119,8 +114,10 @@ bun run coverage
 ```sh
 alias i='bun run interfaces-force'
 alias t="forge test "
+alias tm="forge test --match-test "
+alias ts="forge test --match-test statefulFuzz"
 alias g="bun run test-gas"
-alias gm="FOUNDRY_PROFILE=gas forge build && FOUNDRY_PROFILE=testgas forge test -m "
+alias gm="FOUNDRY_PROFILE=gas forge build && FOUNDRY_PROFILE=testgas forge test --match-test "
 alias w='forge test -vv --watch '
 
 t -m testA

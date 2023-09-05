@@ -10,7 +10,7 @@ import {PrimaryScenarios} from "test/utils/TestTypes.sol";
 import {MarginCallGeneralTest} from "test/MarginCallGeneral.t.sol";
 import {console} from "contracts/libraries/console.sol";
 
-//@dev Test what happens when we perform forced bid on a short instead of an ask
+//@dev Test what happens when forced bid is performed on a short instead of an ask
 contract MarginCallShortsTest is MarginCallGeneralTest {
     using U256 for uint256;
     using Math128 for uint128;

@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# run tests and lint before push
 protected_branch='master'
 current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
 

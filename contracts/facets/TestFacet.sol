@@ -22,12 +22,12 @@ contract TestFacet is Modifiers {
         baseAsset = asset;
     }
 
-    function setFrozen(address asset, F value) external onlyOwner {
+    function setFrozenT(address asset, F value) external {
         s.asset[asset].frozen = value;
     }
 
     // @dev same as OwnerFacet.setPrimaryLiquidationCR without requires for testing
-    function setprimaryLiquidationCRT(address asset, uint16 value) external onlyOwner {
+    function setprimaryLiquidationCRT(address asset, uint16 value) external {
         s.asset[asset].primaryLiquidationCR = value;
     }
 
@@ -208,7 +208,7 @@ contract TestFacet is Modifiers {
         s.vault[vault].zethYieldRate += 1;
     }
 
-    function setforcedBidPriceBufferT(address asset, uint8 value) external onlyOwner {
+    function setforcedBidPriceBufferT(address asset, uint8 value) external {
         s.asset[asset].forcedBidPriceBuffer = value;
     }
 
@@ -216,7 +216,7 @@ contract TestFacet is Modifiers {
         s.asset[asset].ercDebtRate = value;
     }
 
-    function setOrderIdT(address asset, uint16 value) external onlyOwner {
+    function setOrderIdT(address asset, uint16 value) external {
         s.asset[asset].orderId = value;
     }
 

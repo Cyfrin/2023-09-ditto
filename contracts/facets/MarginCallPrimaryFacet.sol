@@ -32,11 +32,12 @@ contract MarginCallPrimaryFacet is Modifiers {
 
     /**
      * @notice Flags short under primaryLiquidationCR to be eligible for liquidation after time has passed
-     * @dev used to flag for primary liquidation method
+     * @dev Used to flag for primary liquidation method
      *
      * @param asset The market that will be impacted
      * @param shorter Shorter getting liquidated
      * @param id id of short getting liquidated
+     * @param flaggerHint Hint ID for gas-optimized update of short flagger
      *
      */
     function flagShort(address asset, address shorter, uint8 id, uint16 flaggerHint)
@@ -74,13 +75,13 @@ contract MarginCallPrimaryFacet is Modifiers {
 
     /**
      * @notice Liquidates short by forcing shorter to place bid on market
-     * @dev primary liquidation method. Requires flag
-     * @dev shorter will bear the cost of forcedBid on market
+     * @dev Primary liquidation method. Requires flag
+     * @dev Shorter will bear the cost of forcedBid on market
      *
      * @param asset The market that will be impacted
      * @param shorter Shorter getting liquidated
-     * @param id id of short getting liquidated
-     * @param shortHintArray array of hintId for the id to start matching against shorts since you can't match a short < oracle price
+     * @param id Id of short getting liquidated
+     * @param shortHintArray Array of hintId for the id to start matching against shorts since you can't match a short < oracle price
      *
      * @return gasFee Estimated cost of gas for the forcedBid
      * @return ethFilled Amount of eth filled in forcedBid
@@ -99,7 +100,7 @@ contract MarginCallPrimaryFacet is Modifiers {
     {
         if (msg.sender == shorter) revert Errors.CannotLiquidateSelf();
 
-        //@dev marginCall requires more up to date oraclePrice
+        //@dev marginCall requires more up-to-date oraclePrice (15 min vs createLimitBid's 1 hour)
         LibOrders.updateOracleAndStartingShortViaTimeBidOnly(
             asset, OF.FifteenMinutes, shortHintArray
         );
@@ -159,7 +160,7 @@ contract MarginCallPrimaryFacet is Modifiers {
      *
      * @param asset The market that will be impacted
      * @param shorter Shorter getting liquidated
-     * @param id id of short getting liquidated
+     * @param id Id of short getting liquidated
      *
      * @return m Memory struct used throughout MarginCallPrimaryFacet.sol
      */
@@ -189,12 +190,12 @@ contract MarginCallPrimaryFacet is Modifiers {
     }
 
     /**
-     * @notice Handles the setting up and execution of making a forcedBid
-     * @dev shorter will bear the cost of forcedBid on market
-     * @dev depending on shorter's cRatio, the tapp can attempt to fund bid
+     * @notice Handles the set up and execution of making a forcedBid
+     * @dev Shorter will bear the cost of forcedBid on market
+     * @dev Depending on shorter's cRatio, the TAPP can attempt to fund bid
      *
      * @param m Memory struct used throughout MarginCallPrimaryFacet.sol
-     * @param shortHintArray array of hintId for the id to start matching against shorts since you can't match a short < oracle price
+     * @param shortHintArray Array of hintId for the id to start matching against shorts since you can't match a short < oracle price
      *
      */
 
@@ -205,24 +206,24 @@ contract MarginCallPrimaryFacet is Modifiers {
         uint256 startGas = gasleft();
         uint88 ercAmountLeft;
 
-        //@dev provide higher price to better ensure we can fully fill the margin call
+        //@dev Provide higher price to better ensure it can fully fill the margin call
         uint80 _bidPrice = m.oraclePrice.mulU80(m.forcedBidPriceBuffer);
 
         // Shorter loses leftover collateral to TAPP when unable to maintain CR above the minimum
         m.loseCollateral = m.cRatio <= m.minimumCR;
 
-        //@dev: Increase ethEscrowed by shorter's full collateral for forced bid
+        //@dev Increase ethEscrowed by shorter's full collateral for forced bid
         s.vaultUser[m.vault][address(this)].ethEscrowed += m.short.collateral;
 
         // Check ability of TAPP plus short collateral to pay back ethDebt
         if (s.vaultUser[m.vault][address(this)].ethEscrowed < m.ethDebt) {
             uint96 ercDebtPrev = m.short.ercDebt;
             if (s.asset[m.asset].ercDebt <= ercDebtPrev) {
-                // Occurs when only one shortRecord in the asset
+                // Occurs when only one shortRecord in the asset (market)
                 revert Errors.CannotSocializeDebt();
             }
             m.loseCollateral = true;
-            // Max ethDebt can only be the ethEscrowed in the TAPP
+            // @dev Max ethDebt can only be the ethEscrowed in the TAPP
             m.ethDebt = s.vaultUser[m.vault][address(this)].ethEscrowed;
             // Reduce ercDebt proportional to ethDebt
             m.short.ercDebt = uint88(
@@ -234,7 +235,7 @@ contract MarginCallPrimaryFacet is Modifiers {
                 ercDebtSocialized.divU64(s.asset[m.asset].ercDebt - ercDebtPrev);
         }
 
-        // @dev MarginCall contract will be the caller. Virtual accounting done later for shorter or tapp
+        // @dev MarginCall contract will be the caller. Virtual accounting done later for shorter or TAPP
         (m.ethFilled, ercAmountLeft) = IDiamond(payable(address(this))).createForcedBid(
             address(this), m.asset, _bidPrice, m.short.ercDebt, shortHintArray
         );
@@ -247,7 +248,7 @@ contract MarginCallPrimaryFacet is Modifiers {
 
         uint256 gasUsed = startGas - gasleft();
         //@dev manually setting basefee to 1,000,000 in foundry.toml;
-        //@dev By basing gasFee off of baseFee instead of priority, we prevent adversaries from draining the tap
+        //@dev By basing gasFee off of baseFee instead of priority, adversaries are prevent from draining the TAPP
         m.gasFee = uint88(gasUsed * block.basefee); // @dev(safe-cast)
     }
 
@@ -261,12 +262,12 @@ contract MarginCallPrimaryFacet is Modifiers {
     function _marginFeeHandler(MTypes.MarginCallPrimary memory m) private {
         STypes.VaultUser storage VaultUser = s.vaultUser[m.vault][msg.sender];
         STypes.VaultUser storage TAPP = s.vaultUser[m.vault][address(this)];
-        // distribute fees to tapp and caller
+        // distribute fees to TAPP and caller
         uint88 tappFee = m.ethFilled.mulU88(m.tappFeePct);
         uint88 callerFee = m.ethFilled.mulU88(m.callerFeePct) + m.gasFee;
 
         m.totalFee += tappFee + callerFee;
-        //@dev TAPP already received the gasFee for being the forcedBid caller. Tapp Fee nets out.
+        //@dev TAPP already received the gasFee for being the forcedBid caller. tappFee nets out.
         if (TAPP.ethEscrowed >= callerFee) {
             TAPP.ethEscrowed -= callerFee;
             VaultUser.ethEscrowed += callerFee;
@@ -355,7 +356,7 @@ contract MarginCallPrimaryFacet is Modifiers {
         //@dev if cRatio is below the minimumCR, allow liquidation regardless of flagging
         if (m.cRatio < m.minimumCR) return true;
 
-        //@dev We only check if flagger is empty, not updatedAt
+        //@dev Only check if flagger is empty, not updatedAt
         if (m.short.flaggerId == 0) {
             revert Errors.ShortNotFlagged();
         }

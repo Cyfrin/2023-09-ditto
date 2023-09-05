@@ -427,7 +427,6 @@ contract MarginCallPrimaryTest is MarginCallHelper {
     }
 
     ///////Partial///////
-
     function partiallyLiquidateShortPrimary(PrimaryScenarios scenario, address caller)
         public
         returns (MarginCallStruct memory m, STypes.ShortRecord memory shortRecord)
@@ -635,7 +634,7 @@ contract MarginCallPrimaryTest is MarginCallHelper {
         //reset data
         STypes.ShortRecord memory short =
             getShortRecord(sender, Constants.SHORT_STARTING_ID);
-        vm.stopPrank(); //stop prank
+        vm.stopPrank();
         skip(SIXTEEN_HRS_PLUS); //unflag
         //save fee data from first partial liquidation
         uint256 ethFilled1 = m.ethFilled;
@@ -855,7 +854,7 @@ contract MarginCallPrimaryTest is MarginCallHelper {
         MarginCallStruct memory m
     ) public returns (MarginCallStruct memory m2) {
         //reset data
-        vm.stopPrank(); //stop prank
+        vm.stopPrank();
         skip(SIXTEEN_HRS_PLUS); //unflag
         //save fee data from first partial liquidation
         uint256 ethFilled1 = m.ethFilled;

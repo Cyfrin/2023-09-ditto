@@ -2,12 +2,13 @@
 pragma solidity 0.8.21;
 
 library Constants {
-    // @dev mark head of orders mapping
-    // for all order types, starting point of orders
+    // @dev mark start of orders mapping
     uint8 internal constant HEAD = 1;
+    // @dev only used as an alias since it's the same id
     uint8 internal constant TAIL = 1;
+    // for all order types, starting point of orders
     uint8 internal constant STARTING_ID = 100;
-    uint8 internal constant SHORT_MAX_ID = 254;
+    uint8 internal constant SHORT_MAX_ID = 254; // max uint8
     uint8 internal constant SHORT_STARTING_ID = 2;
 
     uint256 internal constant MIN_DURATION = 14 days;

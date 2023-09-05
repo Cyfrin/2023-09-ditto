@@ -198,7 +198,7 @@ contract ShortOrdersTest is OBFixture {
         fundLimitShortOpt(LOWER_PRICE, DEFAULT_AMOUNT * 3, sender); //102
         fundLimitShortOpt(LOWER_PRICE, DEFAULT_AMOUNT * 4, sender); //103
 
-        //checkout asks
+        //check asks
         STypes.Order[] memory shorts = getShorts();
         assertEq(shorts[0].ercAmount, DEFAULT_AMOUNT);
         assertEq(shorts[1].ercAmount, DEFAULT_AMOUNT * 2);
@@ -227,7 +227,7 @@ contract ShortOrdersTest is OBFixture {
         fundLimitShortOpt(LOWER_PRICE, DEFAULT_AMOUNT * 3, sender); //not matched
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT * 4, sender); //partially matched
 
-        //checkout asks
+        //check asks
         STypes.Order[] memory shorts = getShorts();
         assertEq(shorts[0].ercAmount, DEFAULT_AMOUNT);
         assertEq(shorts[1].ercAmount, DEFAULT_AMOUNT * 2);
@@ -258,7 +258,7 @@ contract ShortOrdersTest is OBFixture {
         fundLimitShortOpt(LOWER_PRICE, DEFAULT_AMOUNT * 3, sender); //not matched/skipped
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT * 4, sender); //matched
 
-        //checkout asks
+        //check asks
         STypes.Order[] memory asks = getAsks();
         assertEq(asks[0].ercAmount, DEFAULT_AMOUNT);
         assertEq(asks[1].ercAmount, DEFAULT_AMOUNT * 2);
@@ -298,8 +298,7 @@ contract ShortOrdersTest is OBFixture {
         fundLimitShortOpt(LOWER_PRICE, DEFAULT_AMOUNT * 3, sender); //not matched/skipped
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT * 4, sender); //matched
 
-        //checkout asks
-
+        //check asks
         STypes.Order[] memory asks = getAsks();
         assertEq(asks[0].ercAmount, DEFAULT_AMOUNT);
         assertEq(asks[1].ercAmount, DEFAULT_AMOUNT * 2);
@@ -338,8 +337,7 @@ contract ShortOrdersTest is OBFixture {
         fundLimitShortOpt(LOWER_PRICE, DEFAULT_AMOUNT * 3, sender); //not matched/skipped
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT * 4, sender); //matched
 
-        //checkout asks
-
+        //check asks
         STypes.Order[] memory asks = getAsks();
         assertEq(asks[0].ercAmount, DEFAULT_AMOUNT);
         assertEq(asks[1].ercAmount, DEFAULT_AMOUNT * 2);
@@ -381,7 +379,7 @@ contract ShortOrdersTest is OBFixture {
         fundLimitShortOpt(LOWER_PRICE, DEFAULT_AMOUNT, sender); //not matched/skipped
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT * 2, sender); //matched
 
-        //checkout asks
+        //check asks
         STypes.Order[] memory asks = getAsks();
         assertEq(asks.length, 7);
         STypes.Order[] memory shorts = getShorts();
@@ -401,7 +399,7 @@ contract ShortOrdersTest is OBFixture {
         STypes.Order[] memory bids = getBids();
         assertEq(bids.length, 1);
 
-        r.ethEscrowed = 4000 * 7; //change
+        r.ethEscrowed = 4000 * 7; //leftover change
         r.ercEscrowed = DEFAULT_AMOUNT * 9;
         assertStruct(receiver, r);
         s.ethEscrowed = LOWER_PRICE.mul(DEFAULT_AMOUNT * 7);
@@ -421,7 +419,7 @@ contract ShortOrdersTest is OBFixture {
         //need to skip to trigger BadShortHint Error
         skip(1 hours);
 
-        //checkout asks
+        //check asks
         STypes.Order[] memory asks = getAsks();
         assertEq(asks.length, 2);
         STypes.Order[] memory shorts = getShorts();
@@ -656,7 +654,7 @@ contract ShortOrdersTest is OBFixture {
     }
 
     // Testing making more shortRecords than uint8 max
-    //@dev Technically uint8 is 255, but shortRecords' startingID is 100. 254 - 100 + 1 = 155
+    //@dev Technically uint8 is 255, but shortRecords' startingID is 100. 254 - 2 + 1 = 253
     function testMake254ShortRecords() public {
         for (uint256 i = Constants.SHORT_STARTING_ID; i < 256; i++) {
             fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);

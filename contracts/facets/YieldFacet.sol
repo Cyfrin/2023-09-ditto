@@ -5,7 +5,6 @@ import {IAsset} from "interfaces/IAsset.sol";
 
 import {STypes, SR} from "contracts/libraries/DataTypes.sol";
 import {Modifiers} from "contracts/libraries/AppStorage.sol";
-import {LibBridge} from "contracts/libraries/LibBridge.sol";
 import {LibAsset} from "contracts/libraries/LibAsset.sol";
 import {LibOrders} from "contracts/libraries/LibOrders.sol";
 import {LibOracle} from "contracts/libraries/LibOracle.sol";

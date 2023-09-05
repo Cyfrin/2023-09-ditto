@@ -306,7 +306,7 @@ contract MiscStorageTest is OBFixture {
 
         vm.prank(sender);
         // remove the second ask
-        cancelAsk(Asks[1].id); // 101forg
+        cancelAsk(Asks[1].id); // 101
 
         Asks = getAsks();
 

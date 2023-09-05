@@ -89,7 +89,7 @@ library Events {
     event ChangeBridgeSetting(address indexed bridge);
     event DeleteBridge(address indexed bridge);
     event NewOwnerCandidate(address newOwnerCandidate);
-    event UpdateBaseOracle(address baseOracle);
+    event NewAdmin(address newAdmin);
     event UpdateAssetOracle(address indexed asset, address newOracle);
 
     //move to test events / test types

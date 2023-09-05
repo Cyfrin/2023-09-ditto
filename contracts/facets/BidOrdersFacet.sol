@@ -128,7 +128,7 @@ contract BidOrdersFacet is Modifiers {
         MTypes.BidMatchAlgo memory b;
         b.oraclePrice = LibOracle.getPrice(asset);
         b.askId = s.asks[asset][Constants.HEAD].nextId;
-        //@dev setting initial shortId to match downwards
+        //@dev setting initial shortId to match "backwards" (See _shortDirectionHandler() below)
         b.shortHintId = b.shortId = Asset.startingShortId;
 
         emit Events.CreateBid(asset, sender, incomingBid.id, incomingBid.creationTime);
@@ -159,6 +159,7 @@ contract BidOrdersFacet is Modifiers {
      * @param asset The market that will be impacted
      * @param incomingBid Active bid order
      * @param orderHintArray Array of hint ID for gas-optimized sorted placement on market
+     * @param b Memory struct used throughout bidMatchAlgo
      *
      * @return ethFilled Amount of eth filled
      * @return ercAmountLeft Amount of erc not matched
@@ -320,6 +321,10 @@ contract BidOrdersFacet is Modifiers {
      * @param asset The market that will be impacted
      * @param incomingBid Active bid order
      * @param matchTotal Struct of the running matched totals
+     * @param b Memory struct used throughout bidMatchAlgo
+     *
+     * @return ethFilled Amount of eth filled
+     * @return ercAmountLeft Amount of erc not matched
      */
 
     function matchIncomingBid(
@@ -336,8 +341,6 @@ contract BidOrdersFacet is Modifiers {
         uint256 vault = Asset.vault;
 
         LibOrders.updateSellOrdersOnMatch(asset, b);
-
-        // console.logAllShorts(asset);
 
         // If at least one short was matched
         if (matchTotal.shortFillEth > 0) {
@@ -420,7 +423,7 @@ contract BidOrdersFacet is Modifiers {
         firstShortIdBelowOracle cannot itself be matched since it is below oracle price
         
         ** shortHintId will always be first Id matched if valid (within 1% of oracle)
-        As such, it will either be used as the last Id matched (if moving backwards ONLY)
+        As such, it will be used as the last Id matched (if moving backwards ONLY)
 
         Example:
         BEFORE: HEAD <-> (ID1)* <-> (ID2) <-> (ID3) <-> (ID4) <-> [ID5] <-> (ID6) <-> NEXT

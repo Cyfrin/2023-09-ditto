@@ -139,7 +139,7 @@ contract ERC721Facet is Modifiers, IERC721 {
      * Emits a {Transfer} event.
      */
     function transferFrom(address from, address to, uint256 tokenId) public {
-        // ensure the tokenId can be downcasted to 40 bits
+        // @dev ensure the tokenId can be downcasted to 40 bits
         if (tokenId > type(uint40).max) revert Errors.InvalidTokenId();
 
         if (
@@ -193,7 +193,7 @@ contract ERC721Facet is Modifiers, IERC721 {
      * Emits an {Approval} event.
      */
     function approve(address to, uint256 tokenId) external {
-        // ensure the tokenId can be downcasted to 40 bits
+        // @dev ensure the tokenId can be downcasted to 40 bits
         if (tokenId > type(uint40).max) revert Errors.InvalidTokenId();
         address owner = _ownerOf(tokenId);
 
@@ -249,6 +249,14 @@ contract ERC721Facet is Modifiers, IERC721 {
         return s.getApproved[tokenId];
     }
 
+    /**
+     * @notice Mints NFT for active shortRecord
+     * @dev Minters can only mint their own shortRecords
+     *
+     * @param asset The market that will be impacted
+     * @param shortRecordId Id of active shortRecord
+     */
+
     function mintNFT(address asset, uint8 shortRecordId)
         external
         isNotFrozen(asset)
@@ -302,6 +310,7 @@ contract ERC721Facet is Modifiers, IERC721 {
                     revert Errors.ERC721InvalidReceiver(to);
                 } else {
                     /// @solidity memory-safe-assembly
+                    // solhint-disable-next-line no-inline-assembly
                     assembly {
                         revert(add(32, reason), mload(reason))
                     }

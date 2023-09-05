@@ -12,7 +12,7 @@ import {ConstantsTest} from "test/utils/ConstantsTest.sol";
 import {TestTypes} from "test/utils/TestTypes.sol";
 import {DeployHelper} from "deploy/DeployHelper.sol";
 
-import {console} from "contracts/libraries/console.sol";
+// import {console} from "contracts/libraries/console.sol";
 
 // solhint-disable-next-line max-states-count
 contract OBFixture is DeployHelper, ConstantsTest {
@@ -98,6 +98,10 @@ contract OBFixture is DeployHelper, ConstantsTest {
 
     function setETH(int256 price) public {
         _setETH(price);
+    }
+
+    function setETHChainlinkOnly(int256 price) public {
+        _setETHChainlinkOnly(price);
     }
 
     function createUserStruct(address account)
@@ -411,24 +415,24 @@ contract OBFixture is DeployHelper, ConstantsTest {
     function exitShort(uint8 id, uint88 amount, uint80 price, address account) public {
         uint16[] memory shortHintArray = setShortHintArray();
         vm.prank(account);
-        //No need to deposit since we are using collateral to buy back
+        //No need to deposit since the short's collateral is used to buy back
         diamond.exitShort(asset, id, amount, price, shortHintArray);
     }
 
     function exitShort(uint8 id, uint88 amount, uint80 price) public {
-        //No need to deposit since we are using collateral to buy back
+        //No need to deposit since the short's collateral is used to buy back
         diamond.exitShort(asset, id, amount, price, shortHintArrayStorage);
     }
 
     function exitShortWallet(uint8 id, uint88 amount, address account) public {
         vm.prank(account);
-        //No need to deposit since we are using collateral to buy back
+        //No need to deposit since the short's collateral is used to buy back
         diamond.exitShortWallet(asset, id, amount);
     }
 
     function exitShortErcEscrowed(uint8 id, uint88 amount, address account) public {
         vm.prank(account);
-        //No need to deposit since we are using collateral to buy back
+        //No need to deposit since the short's collateral is used to buy back
         diamond.exitShortErcEscrowed(asset, id, amount);
     }
 

@@ -48,7 +48,7 @@ contract MarginCallRevertTest is MarginCallHelper {
         diamond.flagShort(asset, sender, Constants.SHORT_STARTING_ID, Constants.HEAD);
 
         skipTimeAndSetEth({skipTime: SIXTEEN_HRS_PLUS, ethPrice: 2666 ether});
-        //succesfully mark
+
         vm.startPrank(receiver);
         diamond.liquidate(
             asset, sender, Constants.SHORT_STARTING_ID, shortHintArrayStorage
@@ -245,7 +245,6 @@ contract MarginCallRevertTest is MarginCallHelper {
     function testRevertCantliquidateErcEscrowedNotEnoughERC() public {
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender);
-        // STypes.ShortRecord memory shortRecord = getShortRecord(sender, Constants.SHORT_STARTING_ID);
         assertEq(getShortRecordCount(sender), 1);
         //lock up erc for receiver
         createAsk(

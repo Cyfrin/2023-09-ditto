@@ -6,6 +6,7 @@ async function writeFile(path: string, contents: string) {
   await fs.writeFile(path, contents);
 }
 
+// write gas test values to json to diff
 async function combineGasSnapshots() {
   const SNAPSHOTS_DIR = ".forge-snapshots";
   let dirPath = path.join(process.cwd(), SNAPSHOTS_DIR);

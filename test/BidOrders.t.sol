@@ -60,10 +60,10 @@ contract BidOrdersTest is OBFixture {
         uint256 shortFillErc = receiverErcEscrowed - askFillErc;
         assertEq(diamond.getAssetStruct(asset).ercDebt, shortFillErc);
     }
+
     ///////matching tests///////
     //Limit Bid
     //Different Prices
-
     function testAddingBidsWithNoSells() public {
         (, uint256 ercAmountLeft) =
             fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
@@ -155,8 +155,8 @@ contract BidOrdersTest is OBFixture {
             senderPrice: DEFAULT_PRICE + 1 wei
         });
     }
-    //Different ErcAmounts
 
+    //Different ErcAmounts
     function testAddingLimitBidUsdGreaterSellUsd() public {
         fundLimitAskOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender);
         (, uint256 ercAmountLeft) =
@@ -396,7 +396,6 @@ contract BidOrdersTest is OBFixture {
         createAsksAndShortsWithDifferentPrices();
         fundLimitBidOpt(DEFAULT_PRICE + 4 wei, DEFAULT_AMOUNT * 6, receiver);
 
-        //putting ugly accounting numbers into variables
         uint256 bidEth = ((DEFAULT_PRICE + 4 wei).mulU88(DEFAULT_AMOUNT) * 6);
         uint256 askEthSold = (DEFAULT_PRICE + 1 wei).mulU88(DEFAULT_AMOUNT)
             + (DEFAULT_PRICE + 2 wei).mulU88(DEFAULT_AMOUNT)
@@ -500,7 +499,7 @@ contract BidOrdersTest is OBFixture {
 
     function testMatchingLimitBidOnAsksAndShortsDifferentPricesOptimized() public {
         createAsksAndShortsWithDifferentPrices();
-        //putting ugly accounting numbers into variables
+
         uint256 bidEth = ((DEFAULT_PRICE + 4 wei).mulU88(DEFAULT_AMOUNT) * 6);
         uint256 askEthSold = (DEFAULT_PRICE + 1 wei).mulU88(DEFAULT_AMOUNT)
             + (DEFAULT_PRICE + 2 wei).mulU88(DEFAULT_AMOUNT)
@@ -561,7 +560,6 @@ contract BidOrdersTest is OBFixture {
     }
 
     //Market Bid
-
     function testMarketBuyNoSells() public {
         assertEq(getBids().length, 0);
         fundMarketBid(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
@@ -925,7 +923,6 @@ contract BidOrdersTest is OBFixture {
     }
 
     //OrderType and prevOrderType
-
     function testPrevOrderTypeCancelledBid() public {
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertTrue(getBids()[0].orderType == O.LimitBid);

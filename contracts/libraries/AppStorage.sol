@@ -9,10 +9,11 @@ import {Constants} from "contracts/libraries/Constants.sol";
 // import {console} from "contracts/libraries/console.sol";
 
 struct AppStorage {
+    address admin;
     address ownerCandidate;
-    address oracle; // base oracle
+    address baseOracle;
     uint24 flaggerIdCounter;
-    uint40 tokenIdCounter; //NFT - As of 2023, Ethereum had ~2B total tx. Uint40 max value is 1T, which is more than enough
+    uint40 tokenIdCounter; //NFT - As of 2023, Ethereum had ~2B total tx. Uint40 max value is 1T, which is more than enough for NFTs
     uint8 reentrantStatus;
     // ZETH
     mapping(address zeth => uint256 vault) zethVault;
@@ -56,8 +57,15 @@ function appStorage() pure returns (AppStorage storage s) {
 contract Modifiers {
     AppStorage internal s;
 
-    modifier onlyOwner() {
+    modifier onlyDAO() {
         LibDiamond.enforceIsContractOwner();
+        _;
+    }
+
+    modifier onlyAdminOrDAO() {
+        if (msg.sender != LibDiamond.contractOwner() && msg.sender != s.admin) {
+            revert Errors.NotOwnerOrAdmin();
+        }
         _;
     }
 

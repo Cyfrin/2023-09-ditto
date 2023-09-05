@@ -9,7 +9,6 @@ import {F, STypes} from "contracts/libraries/DataTypes.sol";
 import {Modifiers} from "contracts/libraries/AppStorage.sol";
 import {LibAsset} from "contracts/libraries/LibAsset.sol";
 import {LibOracle} from "contracts/libraries/LibOracle.sol";
-import {LibShortRecord} from "contracts/libraries/LibShortRecord.sol";
 
 // import {console} from "contracts/libraries/console.sol";
 

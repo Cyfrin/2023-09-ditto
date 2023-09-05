@@ -8,7 +8,6 @@ import {Modifiers} from "contracts/libraries/AppStorage.sol";
 import {STypes, MTypes, O, SR} from "contracts/libraries/DataTypes.sol";
 import {LibOrders} from "contracts/libraries/LibOrders.sol";
 import {LibOracle} from "contracts/libraries/LibOracle.sol";
-import {LibBridge} from "contracts/libraries/LibBridge.sol";
 import {LibVault} from "contracts/libraries/LibVault.sol";
 import {LibShortRecord} from "contracts/libraries/LibShortRecord.sol";
 
@@ -107,13 +106,13 @@ contract ViewFacet is Modifiers {
 
     /**
      * @notice Returns correct Id of bid based on its price
+     * @dev does not need read only re-entrancy
      *
      * @param asset The market that will be impacted
      * @param price price of bid
      *
      * @return hintId Exact bid ID in sorted Bid Orders
      */
-    //@dev does not need read only re-entrancy
     function getBidHintId(address asset, uint256 price)
         external
         view
@@ -126,13 +125,14 @@ contract ViewFacet is Modifiers {
 
     /**
      * @notice Returns correct Id of ask based on its price
+     * @dev does not need read only re-entrancy
      *
      * @param asset The market that will be impacted
      * @param price price of ask
      *
      * @return hintId Exact ask ID in sorted Ask Orders
      */
-    //@dev does not need read only re-entrancy
+
     function getAskHintId(address asset, uint256 price)
         external
         view
@@ -145,13 +145,14 @@ contract ViewFacet is Modifiers {
 
     /**
      * @notice Returns correct Id of short based on its price
+     * @dev does not need read only re-entrancy
      *
      * @param asset The market that will be impacted
      * @param price price of short
      *
      * @return hintId Exact short ID in sorted Short Orders
      */
-    //@dev does not need read only re-entrancy
+
     function getShortHintId(address asset, uint256 price)
         external
         view
@@ -230,7 +231,7 @@ contract ViewFacet is Modifiers {
 
     /// Margin Call View Functions
     /**
-     * @notice computes the c-ratio of a specific short
+     * @notice computes the c-ratio of a specific short at protocol price
      *
      * @param short Short
      *
@@ -244,6 +245,23 @@ contract ViewFacet is Modifiers {
         returns (uint256 cRatio)
     {
         return short.getCollateralRatio(asset);
+    }
+
+    /**
+     * @notice computes the c-ratio of a specific short at oracle price
+     *
+     * @param short Short
+     *
+     * @return cRatio
+     */
+
+    function getCollateralRatioSpotPrice(address asset, STypes.ShortRecord memory short)
+        external
+        view
+        nonReentrantView
+        returns (uint256 cRatio)
+    {
+        return short.getCollateralRatioSpotPrice(LibOracle.getOraclePrice(asset));
     }
 
     /// Oracle View Functions
@@ -516,15 +534,6 @@ contract ViewFacet is Modifiers {
         returns (STypes.Bridge memory)
     {
         return s.bridge[bridge];
-    }
-
-    /**
-     * @notice Returns base oracle address
-     *
-     * @return oracle
-     */
-    function getBaseOracle() external view nonReentrantView returns (address) {
-        return s.oracle;
     }
 
     /**

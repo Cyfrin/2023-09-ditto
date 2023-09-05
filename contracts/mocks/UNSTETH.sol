@@ -48,7 +48,7 @@ contract UNSTETH is ERC721 {
         }
     }
 
-    //add back _permit when we implement permit via erc-2612
+    //add back _permit when permit is implemented via erc-2612
     function requestWithdrawals(uint256[] calldata _amounts, address _owner)
         external
         returns (uint256[] memory requestIds)

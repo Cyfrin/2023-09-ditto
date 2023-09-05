@@ -5,11 +5,7 @@ import {U256} from "contracts/libraries/PRBMathHelper.sol";
 import {OBFixture} from "test/utils/OBFixture.sol";
 import {Constants, Vault} from "contracts/libraries/Constants.sol";
 
-import {IMockAggregatorV3} from "interfaces/IMockAggregatorV3.sol";
-import {IRocketStorage} from "interfaces/IRocketStorage.sol";
 import {IRocketTokenRETH} from "interfaces/IRocketTokenRETH.sol";
-import {ISTETH} from "interfaces/ISTETH.sol";
-import {IUNSTETH} from "interfaces/IUNSTETH.sol";
 
 import {BridgeReth} from "contracts/bridges/BridgeReth.sol";
 import {BridgeSteth} from "contracts/bridges/BridgeSteth.sol";
@@ -39,6 +35,12 @@ contract ForkHelper is OBFixture {
             revert("env: MAINNET_RPC_URL failure");
         }
 
+        _ethAggregator = address(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
+        _steth = address(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
+        _unsteth = address(0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1);
+        _rocketStorage = address(0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46);
+
+        isMock = false;
         super.setUp();
 
         rewind(Constants.STARTING_TIME);
@@ -48,23 +50,14 @@ contract ForkHelper is OBFixture {
         diamond.deleteBridge(_bridgeSteth);
         diamond.deleteBridge(_bridgeReth);
 
-        _ethAggregator = address(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
-        ethAggregator = IMockAggregatorV3(_ethAggregator);
-        _steth = address(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
-        steth = ISTETH(_steth);
-        _unsteth = address(0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1);
-        unsteth = IUNSTETH(payable(_unsteth));
-
         bridgeSteth = new BridgeSteth(steth, unsteth, _diamond);
         _bridgeSteth = address(bridgeSteth);
-
-        _rocketStorage = address(0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46);
-        rocketStorage = IRocketStorage(_rocketStorage);
 
         _reth = rocketStorage.getAddress(
             keccak256(abi.encodePacked("contract.address", "rocketTokenRETH"))
         );
         reth = IRocketTokenRETH(_reth);
+
         bridgeReth = new BridgeReth(rocketStorage, _diamond);
         _bridgeReth = address(bridgeReth);
 
@@ -82,7 +75,6 @@ contract ForkHelper is OBFixture {
             unstakeFee: 0
         });
 
-        diamond.setOracle(_ethAggregator);
         diamond.setAssetOracle(_cusd, _ethAggregator);
         diamond.setSecondaryLiquidationCR(_cusd, 140);
         diamond.setPrimaryLiquidationCR(_cusd, 170);

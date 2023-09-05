@@ -35,7 +35,7 @@ contract ExitShortFacet is Modifiers {
      * @dev allows for partial exit via buyBackAmount
      *
      * @param asset The market that will be impacted
-     * @param id id of short
+     * @param id Id of short
      * @param buyBackAmount Erc amount to buy back
      *
      */
@@ -82,7 +82,7 @@ contract ExitShortFacet is Modifiers {
      * @dev allows for partial exit via buyBackAmount
      *
      * @param asset The market that will be impacted
-     * @param id id of short
+     * @param id Id of short
      * @param buyBackAmount Erc amount to buy back
      *
      */
@@ -135,10 +135,10 @@ contract ExitShortFacet is Modifiers {
      * @dev allows for partial exit via buyBackAmount
      *
      * @param asset The market that will be impacted
-     * @param id id of short
+     * @param id Id of short
      * @param buyBackAmount Erc amount to buy back
-     * @param price price at which shorter wants to place bid
-     * @param shortHintArray array of hintId for the id to start matching against shorts since you can't match a short < oracle price
+     * @param price Price at which shorter wants to place bid
+     * @param shortHintArray Array of hintId for the id to start matching against shorts since you can't match a short < oracle price
      *
      */
 

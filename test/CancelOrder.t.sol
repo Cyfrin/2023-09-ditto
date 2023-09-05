@@ -3,7 +3,8 @@ pragma solidity 0.8.21;
 
 import {U256, U88} from "contracts/libraries/PRBMathHelper.sol";
 import {Errors} from "contracts/libraries/Errors.sol";
-import {STypes, MTypes, O} from "contracts/libraries/DataTypes.sol";
+import {STypes, MTypes, O, SR} from "contracts/libraries/DataTypes.sol";
+import {LibOrders} from "contracts/libraries/LibOrders.sol";
 
 import {OBFixture} from "test/utils/OBFixture.sol";
 // import {console} from "contracts/libraries/console.sol";
@@ -77,7 +78,7 @@ contract CancelOrderTest is OBFixture {
         assertEq(shorts[2].id, 103);
     }
 
-    function testCancelSell() public {
+    function testCancelAsk() public {
         fundLimitAskOpt(1 ether, DEFAULT_AMOUNT, receiver);
         fundLimitAskOpt(2 ether, DEFAULT_AMOUNT, receiver);
         fundLimitAskOpt(3 ether, DEFAULT_AMOUNT, receiver);
@@ -107,25 +108,6 @@ contract CancelOrderTest is OBFixture {
     }
 
     //cancel orders that have been partially filled
-    function testCancelPartiallyFilledAsk() public {
-        fundLimitAskOpt(1 ether, DEFAULT_AMOUNT, sender);
-        fundLimitBidOpt(1 ether, DEFAULT_AMOUNT.mulU88(0.5 ether), receiver);
-
-        STypes.Order[] memory asks = getAsks();
-        assertEq(asks.length, 1);
-
-        s.ethEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether).mul(1 ether);
-        assertStruct(sender, s);
-        r.ercEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether);
-        assertStruct(receiver, r);
-
-        vm.startPrank(sender);
-        cancelAsk(100);
-
-        s.ercEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether);
-        assertStruct(sender, s);
-    }
-
     function testCancelPartiallyFilledBid() public {
         fundLimitBidOpt(1 ether, DEFAULT_AMOUNT, receiver);
         fundLimitAskOpt(1 ether, DEFAULT_AMOUNT.mulU88(0.5 ether), sender);
@@ -138,10 +120,56 @@ contract CancelOrderTest is OBFixture {
         s.ethEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether).mul(1 ether);
         assertStruct(sender, s);
 
-        vm.startPrank(receiver);
+        vm.prank(receiver);
         cancelBid(100);
         r.ethEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether).mul(1 ether);
         assertStruct(receiver, r);
+        assertStruct(sender, s);
+    }
+
+    function testCancelPartiallyFilledShort() public {
+        fundLimitShortOpt(1 ether, DEFAULT_AMOUNT, sender);
+        fundLimitBidOpt(1 ether, DEFAULT_AMOUNT.mulU88(0.5 ether), receiver);
+
+        STypes.Order[] memory shorts = getShorts();
+        assertEq(shorts.length, 1);
+
+        s.ethEscrowed = 0;
+        assertStruct(sender, s);
+        r.ercEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether);
+        assertStruct(receiver, r);
+
+        assertTrue(getShortRecord(sender, 2).status == SR.PartialFill);
+        assertEq(getShortRecord(sender, 2).ercDebt, DEFAULT_AMOUNT.mulU88(0.5 ether));
+
+        vm.prank(sender);
+        cancelShort(100);
+
+        s.ethEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether).mul(1 ether).mul(
+            LibOrders.convertCR(initialMargin)
+        );
+        assertStruct(sender, s);
+
+        assertTrue(getShortRecord(sender, 2).status == SR.FullyFilled);
+        assertEq(getShortRecord(sender, 2).ercDebt, DEFAULT_AMOUNT.mulU88(0.5 ether));
+    }
+
+    function testCancelPartiallyFilledAsk() public {
+        fundLimitAskOpt(1 ether, DEFAULT_AMOUNT, sender);
+        fundLimitBidOpt(1 ether, DEFAULT_AMOUNT.mulU88(0.5 ether), receiver);
+
+        STypes.Order[] memory asks = getAsks();
+        assertEq(asks.length, 1);
+
+        s.ethEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether).mul(1 ether);
+        assertStruct(sender, s);
+        r.ercEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether);
+        assertStruct(receiver, r);
+
+        vm.prank(sender);
+        cancelAsk(100);
+
+        s.ercEscrowed = DEFAULT_AMOUNT.mulU88(0.5 ether);
         assertStruct(sender, s);
     }
 
@@ -237,7 +265,7 @@ contract CancelOrderTest is OBFixture {
         });
         assertEq(getBids().length, 95);
 
-        // succesfully make bid using reused Id
+        // successfully make bid using reused Id
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertEq(diamond.getAssetNormalizedStruct(asset).orderId, 65000);
     }
@@ -254,7 +282,7 @@ contract CancelOrderTest is OBFixture {
         });
         assertEq(getAsks().length, 95);
 
-        //succesfully make ask using reused Id
+        //successfully make ask using reused Id
         fundLimitAskOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertEq(diamond.getAssetNormalizedStruct(asset).orderId, 65000);
     }
@@ -271,7 +299,7 @@ contract CancelOrderTest is OBFixture {
         });
         assertEq(getShorts().length, 95);
 
-        //succesfully make short using reused Id
+        //successfully make short using reused Id
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertEq(diamond.getAssetNormalizedStruct(asset).orderId, 65000);
     }
@@ -312,7 +340,7 @@ contract CancelOrderTest is OBFixture {
             numOrdersToCancel: 1
         });
 
-        //succesfully make bid using reused Id
+        //successfully make bid using reused Id
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertEq(diamond.getAssetNormalizedStruct(asset).orderId, 65000);
     }
@@ -327,7 +355,7 @@ contract CancelOrderTest is OBFixture {
             numOrdersToCancel: 1
         });
 
-        //succesfully make ask using reused Id
+        //successfully make ask using reused Id
         fundLimitAskOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertEq(diamond.getAssetNormalizedStruct(asset).orderId, 65000);
     }
@@ -342,7 +370,7 @@ contract CancelOrderTest is OBFixture {
             numOrdersToCancel: 1
         });
 
-        //succesfully make short using reused Id
+        //successfully make short using reused Id
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertEq(diamond.getAssetNormalizedStruct(asset).orderId, 65000);
     }

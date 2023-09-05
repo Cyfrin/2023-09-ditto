@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const { readdir } = require("fs/promises");
-const MD5 = require("crypto-js/md5");
+const { createHash } = require("node:crypto");
 const generateInterface = require("./");
 
 const myArgs = process.argv.slice(2);
@@ -9,6 +9,10 @@ let dirname = path.join(process.cwd(), "interfaces");
 let force = myArgs.find((a) => a === "--force");
 let quiet = myArgs.find((a) => a === "--quiet");
 let clear = myArgs.find((a) => a === "--clear");
+
+function MD5(content) {
+  return createHash("md5").update(content).digest("hex");
+}
 
 async function getContracts(folder) {
   let contracts = [];
@@ -37,7 +41,6 @@ function isCached(file) {
       encoding: "utf-8",
       flag: "r",
     });
-    let md5 = MD5.hash(fileContent, "hex");
 
     let cache = fs.readFileSync(
       path.join(process.cwd(), "/foundry/cache/solidity-files-cache.json"),
@@ -48,7 +51,7 @@ function isCached(file) {
     );
 
     if (cache) {
-      if (JSON.parse(cache).files[file].contentHash === md5) {
+      if (JSON.parse(cache).files[file].contentHash === MD5(fileContent)) {
         return false;
       } else {
         // console.log(file);

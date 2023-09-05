@@ -172,7 +172,7 @@ contract OracleTest is OBFixture {
         matchOrderAndUpdateOracle({firstOrder: BID, ethPrice: LT_THRESHOLD});
     }
 
-    //Testing  Order Price > saved oracle price
+    //Testing Order Price > saved oracle price
     function testUpdateViaThresholdIncomingBidOrderPriceGtOracle() public {
         matchOrderAndUpdateOracle({firstOrder: SHORT, ethPrice: GT_THRESHOLD});
     }

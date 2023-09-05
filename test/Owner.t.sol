@@ -45,19 +45,37 @@ contract OwnerTest is OBFixture {
         assertEq(diamond.ownerCandidate(), address(0));
     }
 
-    //Unit tests for setters
-    //REVERT//
-
-    function test_setOracle() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
-        diamond.setOracle(address(1));
-
+    function test_TransferAdminship() public {
         vm.prank(owner);
-        diamond.setOracle(address(1));
+        diamond.transferAdminship(extra);
+        assertEq(diamond.owner(), owner);
+        assertEq(diamond.admin(), extra);
+        vm.prank(extra);
+        diamond.transferAdminship(sender);
+        assertEq(diamond.admin(), sender);
     }
 
+    function test_OnlyAdminOrOwner() public {
+        test_TransferAdminship();
+        vm.prank(owner);
+        diamond.transferAdminship(extra);
+        assertEq(diamond.admin(), extra);
+    }
+
+    function testRevert_OnlyAdmin() public {
+        vm.prank(owner);
+        diamond.transferAdminship(extra);
+        assertEq(diamond.owner(), owner);
+        assertEq(diamond.admin(), extra);
+        vm.prank(sender);
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
+        diamond.transferAdminship(sender);
+    }
+
+    //Unit tests for setters
+    //REVERT//
     function test_setTithe() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setTithe(Vault.CARBON, 2);
     }
 
@@ -74,7 +92,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetResetLiquidationTime() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setResetLiquidationTime(asset, 100);
 
         vm.startPrank(owner);
@@ -85,7 +103,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetSecondLiquidationTime() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setSecondLiquidationTime(asset, 100);
 
         vm.startPrank(owner);
@@ -96,7 +114,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetFirstLiquidationTime() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setFirstLiquidationTime(asset, 100);
 
         vm.startPrank(owner);
@@ -107,7 +125,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetInitialMargin() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setFirstLiquidationTime(asset, 10);
 
         vm.startPrank(owner);
@@ -118,7 +136,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetprimaryLiquidationCR() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setFirstLiquidationTime(asset, 10);
 
         vm.startPrank(owner);
@@ -129,7 +147,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetsecondaryLiquidationCR() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setSecondaryLiquidationCR(asset, 100);
 
         vm.startPrank(owner);
@@ -143,7 +161,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetforcedBidPriceBuffer() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setForcedBidPriceBuffer(asset, 100);
 
         vm.startPrank(owner);
@@ -154,7 +172,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetminimumCR() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setMinimumCR(asset, 100);
 
         vm.startPrank(owner);
@@ -165,7 +183,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetTappFeePct() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setTappFeePct(asset, 10);
 
         vm.startPrank(owner);
@@ -176,7 +194,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetCallerFeePct() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setCallerFeePct(asset, 10);
 
         vm.startPrank(owner);
@@ -187,7 +205,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetMinBidEth() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setMinBidEth(asset, 10);
 
         vm.startPrank(owner);
@@ -196,7 +214,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetMinAskEth() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setMinAskEth(asset, 10);
 
         vm.startPrank(owner);
@@ -205,7 +223,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_SetMinShortErc() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setMinShortErc(asset, 10);
 
         vm.startPrank(owner);
@@ -223,7 +241,7 @@ contract OwnerTest is OBFixture {
     }
 
     function testRevert_WithdrawalFee() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
+        vm.expectRevert(Errors.NotOwnerOrAdmin.selector);
         diamond.setWithdrawalFee(asset, 10);
 
         vm.startPrank(owner);
@@ -231,13 +249,7 @@ contract OwnerTest is OBFixture {
         diamond.setWithdrawalFee(_bridgeSteth, 1501);
     }
 
-    function testRevert_SetFrozen() public {
-        vm.expectRevert("LibDiamond: Must be contract owner");
-        diamond.setFrozen(asset, F.Permanent);
-    }
-
     //NON-REVERT//
-
     function test_setDittoMatchedRate() public {
         vm.prank(owner);
         diamond.setDittoMatchedRate(Vault.CARBON, 2);

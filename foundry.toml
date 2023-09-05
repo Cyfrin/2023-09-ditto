@@ -101,5 +101,5 @@ runs = 50
 
 [invariant]
 runs = 10
-depth = 20
+depth = 50
 fail_on_revert = false

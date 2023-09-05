@@ -65,6 +65,8 @@ contract DeployHelper is Test {
     IImmutableCreate2Factory public factory;
     address public _immutableCreate2Factory;
 
+    bool public isMock = true;
+
     bytes32 public constant TIMELOCK_ADMIN_ROLE = keccak256("TIMELOCK_ADMIN_ROLE");
     bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
     bytes32 public constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
@@ -151,18 +153,18 @@ contract DeployHelper is Test {
             //mocks
             _immutableCreate2Factory = deployCode("ImmutableCreate2Factory.sol");
 
-            _steth = deployCode("STETH.sol");
-            steth = ISTETH(_steth);
-            _unsteth = deployCode("UNSTETH.sol", abi.encode(_steth));
-            unsteth = IUNSTETH(payable(_unsteth));
-            _rocketStorage = deployCode("RocketStorage.sol");
-            rocketStorage = IRocketStorage(_rocketStorage);
-            _reth = deployCode("RocketTokenRETH.sol");
-            reth = IRocketTokenRETH(_reth);
-            rocketStorage.setDeposit(_reth);
-            rocketStorage.setReth(_reth);
+            if (isMock) {
+                _steth = deployCode("STETH.sol");
+                _unsteth = deployCode("UNSTETH.sol", abi.encode(_steth));
+                _rocketStorage = deployCode("RocketStorage.sol");
+                _reth = deployCode("RocketTokenRETH.sol");
+                reth = IRocketTokenRETH(_reth);
+                _ethAggregator = deployCode("MockAggregatorV3.sol");
+            }
 
-            _ethAggregator = deployCode("MockAggregatorV3.sol");
+            rocketStorage = IRocketStorage(_rocketStorage);
+            steth = ISTETH(_steth);
+            unsteth = IUNSTETH(payable(_unsteth));
             ethAggregator = IMockAggregatorV3(_ethAggregator);
         } else if (chainId == 1) {
             // create2factory on mainnet = 0x0000000000FFe8B47B3e2130213B802212439497
@@ -175,10 +177,8 @@ contract DeployHelper is Test {
             IDiamond.facetAddress.selector
         ];
         askOrdersSelectors = [IDiamond.createAsk.selector];
-        bidOrdersSelectors = [
-            IDiamond.createBid.selector,
-            IDiamond.createForcedBid.selector // remove
-        ];
+        bidOrdersSelectors =
+            [IDiamond.createBid.selector, IDiamond.createForcedBid.selector];
         bridgeRouterSelectors = [
             IDiamond.getZethTotal.selector,
             IDiamond.getBridges.selector,
@@ -208,8 +208,9 @@ contract DeployHelper is Test {
             IDiamond.transferOwnership.selector,
             IDiamond.claimOwnership.selector,
             IDiamond.owner.selector,
+            IDiamond.admin.selector,
+            IDiamond.transferAdminship.selector,
             IDiamond.ownerCandidate.selector,
-            IDiamond.setOracle.selector,
             IDiamond.setTithe.selector,
             IDiamond.setDittoMatchedRate.selector,
             IDiamond.setDittoShorterRate.selector,
@@ -265,7 +266,7 @@ contract DeployHelper is Test {
             ITestFacet.setEthEscrowed.selector,
             ITestFacet.setErcEscrowed.selector,
             ITestFacet.getUserOrders.selector,
-            ITestFacet.setFrozen.selector,
+            ITestFacet.setFrozenT.selector,
             ITestFacet.getAssets.selector,
             ITestFacet.getAssetsMapping.selector,
             ITestFacet.setTokenId.selector,
@@ -299,6 +300,7 @@ contract DeployHelper is Test {
             IDiamond.getShortIdAtOracle.selector,
             IDiamond.getHintArray.selector,
             IDiamond.getCollateralRatio.selector,
+            IDiamond.getCollateralRatioSpotPrice.selector,
             IDiamond.getAssetPrice.selector,
             IDiamond.getProtocolAssetPrice.selector,
             IDiamond.getTithe.selector,
@@ -315,7 +317,6 @@ contract DeployHelper is Test {
             IDiamond.getVaultStruct.selector,
             IDiamond.getAssetStruct.selector,
             IDiamond.getBridgeStruct.selector,
-            IDiamond.getBaseOracle.selector,
             IDiamond.getOffsetTime.selector,
             IDiamond.getOffsetTimeHours.selector,
             IDiamond.getFlaggerId.selector
@@ -341,7 +342,7 @@ contract DeployHelper is Test {
         ];
 
         factory = IImmutableCreate2Factory(_immutableCreate2Factory);
-        //should this be a ENV var?
+
         bytes32 salt = bytes32(0);
 
         _diamondCut = factory.safeCreate2(
@@ -349,7 +350,10 @@ contract DeployHelper is Test {
         );
         _diamond = factory.safeCreate2(
             salt,
-            abi.encodePacked(type(Diamond).creationCode, abi.encode(_owner, _diamondCut))
+            abi.encodePacked(
+                type(Diamond).creationCode,
+                abi.encode(_owner, _diamondCut, _ethAggregator)
+            )
         );
 
         //Tokens
@@ -706,9 +710,11 @@ contract DeployHelper is Test {
             assertEq(bridgeStethConfig.withdrawalFee, 0);
             assertEq(bridgeStethConfig.unstakeFee, 0);
 
-            diamond.setOracle(_ethAggregator);
-            assertEq(diamond.getBaseOracle(), _ethAggregator);
-            _setETH(4000 ether);
+            if (isMock) {
+                rocketStorage.setDeposit(_reth);
+                rocketStorage.setReth(_reth);
+                _setETH(4000 ether);
+            }
 
             STypes.Asset memory a;
             a.vault = uint8(Vault.CARBON);
@@ -763,7 +769,7 @@ contract DeployHelper is Test {
         }
     }
 
-    function _setETH(int256 amount) public {
+    function _setETHChainlinkOnly(int256 amount) internal {
         ethAggregator = IMockAggregatorV3(_ethAggregator);
 
         ethAggregator.setRoundData(
@@ -773,10 +779,13 @@ contract DeployHelper is Test {
             block.timestamp,
             92233720368547778907 wei
         );
+    }
+
+    function _setETH(int256 amount) public {
+        _setETHChainlinkOnly(amount);
 
         if (amount != 0) {
             uint256 assetPrice = (uint256(amount)).inv();
-            // also set asset price
             testFacet.setOracleTimeAndPrice(_cusd, assetPrice);
         }
     }

@@ -17,6 +17,7 @@ import {ConstantsTest} from "test/utils/ConstantsTest.sol";
 
 /// @dev The handler is the set of valid actions that can be performed during an invariant test run.
 /* solhint-disable no-console */
+// solhint-disable-next-line max-states-count
 contract Handler is ConstantsTest {
     using U256 for uint256;
     using U80 for uint80;
@@ -65,9 +66,12 @@ contract Handler is ConstantsTest {
     uint256 public ghost_primaryMCSRGtZeroCounter;
     uint256 public ghost_primaryMCComplete;
 
+    uint256 public ghost_exitShortNoAsksCounter;
     uint256 public ghost_exitShortCancelledShortCounter;
     uint256 public ghost_secondaryMCSameUserCounter;
     uint256 public ghost_secondaryMCCancelledShortCounter;
+    uint256 public ghost_secondaryMCErcEscrowedShortCounter;
+    uint256 public ghost_secondaryMCWalletShortCounter;
     uint256 public ghost_primaryMCSameUserCounter;
     uint256 public ghost_primaryMCCancelledShortCounter;
 
@@ -135,7 +139,7 @@ contract Handler is ConstantsTest {
     }
 
     modifier useExistingShorter(uint8 userSeed) {
-        currentUser = s_Shorters.rand(userSeed);
+        currentShorter = s_Shorters.rand(userSeed);
         _;
     }
 
@@ -188,38 +192,6 @@ contract Handler is ConstantsTest {
 
     function getShorters() public view returns (address[] memory) {
         return s_Shorters.addrs;
-    }
-
-    function getGhostOrderId() public view returns (uint16) {
-        return ghost_orderId;
-    }
-
-    function getGhostEthEscrowed() public view returns (uint88) {
-        return ghost_ethEscrowed;
-    }
-
-    function getGhostErcEscrowed() public view returns (uint104) {
-        return ghost_ercEscrowed;
-    }
-
-    function getGhostOracleTime() public view returns (uint256) {
-        return ghost_oracleTime;
-    }
-
-    function getGhostOraclePrice() public view returns (uint256) {
-        return ghost_oraclePrice;
-    }
-
-    function getGhostZethYieldRate() public view returns (uint256) {
-        return ghost_zethYieldRate;
-    }
-
-    function getGhostZethCollateralReward() public view returns (uint256) {
-        return ghost_zethCollateralReward;
-    }
-
-    function getGhostTokenIdCounter() public view returns (uint40) {
-        return ghost_tokenIdCounter;
     }
 
     function initialGhostVarSetUp(address _msgSender) public {
@@ -342,21 +314,10 @@ contract Handler is ConstantsTest {
         uint256 oracleTime = diamond.getOracleTimeT(asset);
         if (block.timestamp > oracleTime + 2 hours) {
             //@dev If the block timestamp is > 2 hours from latest "mock-chainlink", update the chainlink
-            s_ob.setETH(4000 ether);
+            s_ob.setETHChainlinkOnly(4000 ether);
         }
 
         initialGhostVarSetUp(currentUser);
-        console.log(
-            string.concat(
-                "fundLimitBidOpt(",
-                vm.toString(price),
-                ",",
-                vm.toString(amount),
-                ",",
-                vm.toString(currentUser),
-                ");"
-            )
-        );
 
         uint88 ethEscrowed = diamond.getVaultUserStruct(vault, currentUser).ethEscrowed;
         if (ethEscrowed < price.mulU88(amount)) {
@@ -368,13 +329,30 @@ contract Handler is ConstantsTest {
         uint16[] memory shortHintArray = new uint16[](1);
         shortHintArray[0] = diamond.getShortIdAtOracle(asset);
 
+        console.log(string.concat("vm.prank(", vm.toString(currentUser), ");"));
+        console.log(
+            string.concat(
+                "createBid(",
+                vm.toString(asset),
+                ",",
+                vm.toString(price),
+                ",",
+                vm.toString(amount),
+                ",",
+                "Constants.LIMIT_ORDER",
+                ",",
+                "orderHintArray",
+                ",",
+                "shortHintArray",
+                ");"
+            )
+        );
         vm.prank(currentUser);
         diamond.createBid(
             asset, price, amount, Constants.LIMIT_ORDER, orderHintArray, shortHintArray
         );
-
-        ghost_oraclePrice = diamond.getOraclePriceT(asset);
         updateShorters();
+        ghost_oraclePrice = diamond.getOraclePriceT(asset);
     }
 
     function createLimitAsk(uint80 price, uint88 amount, uint8 addressSeed)
@@ -388,17 +366,6 @@ contract Handler is ConstantsTest {
         amount = boundU88(amount, DEFAULT_AMOUNT, DEFAULT_AMOUNT * 10);
 
         initialGhostVarSetUp(currentUser);
-        console.log(
-            string.concat(
-                "fundLimitAskOpt(",
-                vm.toString(price),
-                ",",
-                vm.toString(amount),
-                ",",
-                vm.toString(currentUser),
-                ");"
-            )
-        );
 
         uint104 ercEscrowed = diamond.getAssetUserStruct(asset, currentUser).ercEscrowed;
         if (ercEscrowed < amount) {
@@ -407,10 +374,24 @@ contract Handler is ConstantsTest {
 
         MTypes.OrderHint[] memory orderHintArray =
             diamond.getHintArray(asset, price, O.LimitAsk);
-
+        console.log(string.concat("vm.prank(", vm.toString(currentUser), ");"));
+        console.log(
+            string.concat(
+                "createAsk(",
+                vm.toString(asset),
+                ",",
+                vm.toString(price),
+                ",",
+                vm.toString(amount),
+                ",",
+                "Constants.LIMIT_ORDER",
+                ",",
+                "orderHintArray",
+                ");"
+            )
+        );
         vm.prank(currentUser);
         diamond.createAsk(asset, price, amount, Constants.LIMIT_ORDER, orderHintArray);
-
         ghost_oraclePrice = diamond.getOraclePriceT(asset);
     }
 
@@ -427,7 +408,7 @@ contract Handler is ConstantsTest {
         uint256 oracleTime = diamond.getOracleTimeT(asset);
         if (block.timestamp > oracleTime + 2 hours) {
             //@dev If the block timestamp is > 2 hours from latest "mock-chainlink", update the chainlink
-            s_ob.setETH(4000 ether);
+            s_ob.setETHChainlinkOnly(4000 ether);
         }
 
         initialGhostVarSetUp(currentUser);
@@ -477,85 +458,69 @@ contract Handler is ConstantsTest {
             diamond.getAssetStruct(asset).initialMargin
         );
         vm.stopPrank();
-
-        ghost_oraclePrice = diamond.getOraclePriceT(asset);
-
         updateShorters();
+        ghost_oraclePrice = diamond.getOraclePriceT(asset);
     }
 
-    function exitShort(uint80 price, uint8 addressSeed)
+    function exitShort(uint80 price, uint256 index, uint8 addressSeed)
         public
         advanceTime
         advancePrice(addressSeed)
         useExistingShorter(addressSeed)
     {
         ghost_exitShort++;
-        initialGhostVarSetUp(currentUser);
+        initialGhostVarSetUp(currentShorter);
         STypes.ShortRecord[] memory shortRecords =
-            diamond.getShortRecords(asset, currentUser);
+            diamond.getShortRecords(asset, currentShorter);
 
-        if (shortRecords.length > 0) {
-            ghost_exitShortSRGtZeroCounter++;
-            // TODO: exit more than the starting SR
-            if (
-                diamond.getShortRecord(asset, currentUser, Constants.SHORT_STARTING_ID)
-                    .status == SR.Cancelled
-            ) {
-                ghost_exitShortCancelledShortCounter++;
-                return;
-            }
+        if (shortRecords.length == 0) return;
 
-            // bound inputs
-            uint88 shortErcDebt = diamond.getShortRecord(
-                asset, currentUser, Constants.SHORT_STARTING_ID
-            ).ercDebt;
+        //bound inputs
+        index = bound(index, 1, shortRecords.length);
+        //@dev sometimes the short collateral will not be enough to exit short bc price will be too high
+        price = boundU80(
+            price,
+            diamond.getOraclePriceT(asset).div(1.1 ether),
+            diamond.getOraclePriceT(asset).mul(1.1 ether)
+        );
 
-            //@dev sometimes the short collateral will not be enough to exit short bc price will be too high
-            price = boundU80(
-                price,
-                diamond.getOraclePriceT(asset).div(1.1 ether),
-                diamond.getOraclePriceT(asset).mul(1.1 ether)
-            );
-
-            console.log(
-                string.concat(
-                    "fundLimitAskOpt(",
-                    vm.toString(price),
-                    ",",
-                    vm.toString(shortErcDebt),
-                    ",",
-                    vm.toString(currentUser),
-                    ");"
-                )
-            );
-            //@dev create ask for exit short
-            s_ob.fundLimitAskOpt(price, shortErcDebt, currentUser);
-
-            console.log(
-                string.concat(
-                    "exitShort(Constants.SHORT_STARTING_ID, ",
-                    vm.toString(shortErcDebt),
-                    ",",
-                    vm.toString(price),
-                    ",",
-                    vm.toString(currentUser),
-                    ");"
-                )
-            );
-            s_ob.exitShort(
-                Constants.SHORT_STARTING_ID, shortErcDebt, uint80(price), currentUser
-            );
-
-            ghost_oraclePrice = diamond.getOraclePriceT(asset);
-
-            updateShorters();
-            ghost_exitShortComplete++;
+        STypes.ShortRecord memory shortRecord = shortRecords[index - 1];
+        ghost_exitShortSRGtZeroCounter++;
+        if (shortRecord.status == SR.Cancelled) {
+            ghost_exitShortCancelledShortCounter++;
+            return;
         }
+
+        if (diamond.getAsks(asset).length == 0) {
+            ghost_exitShortNoAsksCounter++;
+            return;
+        }
+
+        console.log(
+            string.concat(
+                "exitShort(",
+                vm.toString(shortRecord.id),
+                ",",
+                vm.toString(shortRecord.ercDebt),
+                ",",
+                vm.toString(price),
+                ",",
+                vm.toString(currentShorter),
+                ");"
+            )
+        );
+        s_ob.exitShort(shortRecord.id, shortRecord.ercDebt, uint80(price), currentShorter);
+        ghost_exitShortComplete++;
+        updateShorters();
+        ghost_oraclePrice = diamond.getOraclePriceT(asset);
     }
 
+    //@dev Do not include this in invariant files that check systemwide zethTotal or ercDebt. FundLimitOrders will break
     function mintNFT(uint80 price, uint88 amount, uint256 index, uint8 addressSeed)
         public
         advanceTime
+        advancePrice(addressSeed)
+        useExistingShorter(addressSeed)
     {
         address msgSender = _seedToAddress(addressSeed);
         initialGhostVarSetUp(msgSender);
@@ -565,7 +530,7 @@ contract Handler is ConstantsTest {
         amount = boundU88(amount, DEFAULT_AMOUNT, DEFAULT_AMOUNT * 10);
 
         // keep oracle price fixed
-        s_ob.setETH(4000 ether);
+        s_ob.setETHChainlinkOnly(4000 ether);
 
         //match short with bid
         s_ob.fundLimitBidOpt(price, amount, msgSender);
@@ -581,10 +546,10 @@ contract Handler is ConstantsTest {
         vm.prank(msgSender);
         diamond.mintNFT(asset, shortRecord.id);
 
-        ghost_oraclePrice = diamond.getOraclePriceT(asset);
         s_Users.add(msgSender);
         s_Shorters.add(msgSender);
         s_NFTOwners.add(msgSender);
+        ghost_oraclePrice = diamond.getOraclePriceT(asset);
     }
 
     function transferNFT(uint256 index, uint8 addressSeed)
@@ -615,232 +580,235 @@ contract Handler is ConstantsTest {
         updateShorters();
     }
 
-    function secondaryMarginCall(uint88 amount, uint8 addressSeed)
+    function secondaryMarginCall(uint88 amount, uint256 index, uint8 addressSeed)
         public
         advanceTime
         advancePrice(addressSeed)
+        useExistingUser(addressSeed)
         useExistingShorter(addressSeed)
     {
         ghost_secondaryMC++;
-        initialGhostVarSetUp(currentUser);
+        initialGhostVarSetUp(currentShorter);
         STypes.ShortRecord[] memory shortRecords =
-            diamond.getShortRecords(asset, currentUser);
+            diamond.getShortRecords(asset, currentShorter);
+        if (shortRecords.length == 0) return;
+        // bound inputs
+        index = bound(index, 1, shortRecords.length);
+        STypes.ShortRecord memory shortRecord = shortRecords[index - 1];
 
-        if (shortRecords.length > 0) {
-            ghost_secondaryMCSRGtZeroCounter++;
-            // bound inputs
-            amount = boundU88(amount, DEFAULT_AMOUNT, DEFAULT_AMOUNT * 10);
+        ghost_secondaryMCSRGtZeroCounter++;
+        // bound inputs
+        amount = boundU88(amount, DEFAULT_AMOUNT, DEFAULT_AMOUNT * 10);
 
-            address marginCaller = _seedToAddress(addressSeed);
-            if (marginCaller == currentUser) {
-                ghost_secondaryMCSameUserCounter++;
+        address marginCaller = currentUser;
+        if (marginCaller == currentShorter) {
+            ghost_secondaryMCSameUserCounter++;
+            return;
+        }
+
+        if (shortRecord.status == SR.Cancelled) {
+            ghost_secondaryMCCancelledShortCounter++;
+            return;
+        }
+
+        //@dev reduce price to margin call levels
+        int256 preMCPrice = int256(diamond.getOraclePriceT(asset).inv());
+        s_ob.setETH(750 ether);
+        console.log("setETH(750 ether);");
+
+        //@dev randomly choose between erc vs wallet approach
+        if (addressSeed % 2 == 0) {
+            if (
+                diamond.getAssetUserStruct(asset, marginCaller).ercEscrowed
+                    < shortRecord.ercDebt
+            ) {
+                s_ob.setETH(preMCPrice);
                 return;
             }
 
-            STypes.ShortRecord memory short =
-                diamond.getShortRecord(asset, currentUser, Constants.SHORT_STARTING_ID);
-            if (short.status == SR.Cancelled) {
-                ghost_secondaryMCCancelledShortCounter++;
-                return;
-            }
-            uint88 shortErcDebt = short.ercDebt;
+            console.log(
+                string.concat(
+                    "liquidateErcEscrowed(",
+                    vm.toString(currentShorter),
+                    ",",
+                    vm.toString(shortRecord.id),
+                    ",",
+                    vm.toString(shortRecord.ercDebt),
+                    ",",
+                    vm.toString(marginCaller),
+                    ");"
+                )
+            );
 
-            //@dev reduce price to margin call levels
-            int256 preMCPrice = int256(diamond.getOraclePriceT(asset).inv());
-            s_ob.setETH(500 ether);
-            console.log("setETH(500 ether);");
-
-            //@dev randomly choose between erc vs wallet approach
-            if (addressSeed % 2 == 0) {
-                if (
-                    diamond.getAssetUserStruct(asset, marginCaller).ercEscrowed
-                        < shortErcDebt
-                ) {
-                    return;
-                }
-
+            s_ob.liquidateErcEscrowed(
+                currentShorter, shortRecord.id, shortRecord.ercDebt, marginCaller
+            );
+            ghost_secondaryMCErcEscrowedShortCounter++;
+        } else {
+            if (IAsset(asset).balanceOf(marginCaller) >= shortRecord.ercDebt) {
                 console.log(
                     string.concat(
-                        "liquidateErcEscrowed(",
-                        vm.toString(currentUser),
+                        "liquidateWallet(",
+                        vm.toString(currentShorter),
                         ",",
-                        vm.toString(Constants.SHORT_STARTING_ID),
+                        vm.toString(shortRecord.id),
                         ",",
-                        vm.toString(shortErcDebt),
+                        vm.toString(shortRecord.ercDebt),
                         ",",
                         vm.toString(marginCaller),
                         ");"
                     )
                 );
-
-                s_ob.liquidateErcEscrowed(
-                    currentUser, Constants.SHORT_STARTING_ID, shortErcDebt, marginCaller
+                s_ob.liquidateWallet(
+                    currentShorter, shortRecord.id, shortRecord.ercDebt, marginCaller
                 );
+
+                ghost_secondaryMCWalletShortCounter++;
+            } else if (
+                diamond.getAssetUserStruct(asset, marginCaller).ercEscrowed
+                    >= shortRecord.ercDebt
+            ) {
+                //withdraw
+                console.log(string.concat("vm.prank(", vm.toString(marginCaller), ");"));
+                console.log(
+                    string.concat(
+                        "diamond.withdrawAsset(asset,",
+                        vm.toString(shortRecord.ercDebt),
+                        ");"
+                    )
+                );
+
+                console.log(
+                    string.concat(
+                        "liquidateWallet(",
+                        vm.toString(currentShorter),
+                        ",",
+                        vm.toString(shortRecord.id),
+                        ",",
+                        vm.toString(shortRecord.ercDebt),
+                        ",",
+                        vm.toString(marginCaller),
+                        ");"
+                    )
+                );
+                vm.prank(marginCaller);
+                diamond.withdrawAsset(asset, shortRecord.ercDebt);
+
+                s_ob.liquidateWallet(
+                    currentShorter, shortRecord.id, shortRecord.ercDebt, marginCaller
+                );
+                ghost_secondaryMCWalletShortCounter++;
             } else {
-                if (IAsset(asset).balanceOf(marginCaller) >= shortErcDebt) {
-                    s_ob.liquidateWallet(
-                        currentUser,
-                        Constants.SHORT_STARTING_ID,
-                        shortErcDebt,
-                        marginCaller
-                    );
-
-                    console.log(
-                        string.concat(
-                            "liquidateWallet(",
-                            vm.toString(currentUser),
-                            ",",
-                            vm.toString(Constants.SHORT_STARTING_ID),
-                            ",",
-                            vm.toString(shortErcDebt),
-                            ",",
-                            vm.toString(marginCaller),
-                            ");"
-                        )
-                    );
-                } else if (
-                    diamond.getAssetUserStruct(asset, marginCaller).ercEscrowed
-                        >= shortErcDebt
-                ) {
-                    //withdraw
-                    console.log(
-                        string.concat(
-                            "diamond.withdrawAsset(asset,",
-                            vm.toString(shortErcDebt),
-                            ");"
-                        )
-                    );
-                    vm.prank(marginCaller);
-                    diamond.withdrawAsset(asset, shortErcDebt);
-
-                    console.log(
-                        string.concat(
-                            "liquidateWallet(",
-                            vm.toString(currentUser),
-                            ",",
-                            vm.toString(Constants.SHORT_STARTING_ID),
-                            ",",
-                            vm.toString(shortErcDebt),
-                            ",",
-                            vm.toString(marginCaller),
-                            ");"
-                        )
-                    );
-                    s_ob.liquidateWallet(
-                        currentUser,
-                        Constants.SHORT_STARTING_ID,
-                        shortErcDebt,
-                        marginCaller
-                    );
-                } else {
-                    return;
-                }
+                s_ob.setETH(preMCPrice);
+                return;
             }
-
-            //@dev reset price back to original levels
-            s_ob.setETH(preMCPrice);
-
-            s_Users.add(marginCaller);
-            updateShorters();
-            ghost_secondaryMCComplete++;
         }
+
+        //@dev reset price back to original levels
+        s_ob.setETH(preMCPrice);
+
+        updateShorters();
+        ghost_secondaryMCComplete++;
+        ghost_oraclePrice = diamond.getOraclePriceT(asset);
     }
 
-    function primaryMarginCall(uint8 addressSeed)
+    function primaryMarginCall(uint256 index, uint8 addressSeed)
         public
         advanceTime
         advancePrice(addressSeed)
+        useExistingUser(addressSeed)
         useExistingShorter(addressSeed)
     {
         ghost_primaryMC++;
-        initialGhostVarSetUp(currentUser);
+        initialGhostVarSetUp(currentShorter);
         STypes.ShortRecord[] memory shortRecords =
-            diamond.getShortRecords(asset, currentUser);
+            diamond.getShortRecords(asset, currentShorter);
 
-        if (shortRecords.length > 0) {
-            ghost_primaryMCSRGtZeroCounter++;
-            address marginCaller = _seedToAddress(addressSeed);
-            if (marginCaller == currentUser) {
-                ghost_primaryMCSameUserCounter++;
-                return;
-            }
+        if (shortRecords.length == 0) return;
 
-            STypes.ShortRecord memory short =
-                diamond.getShortRecord(asset, currentUser, Constants.SHORT_STARTING_ID);
-            if (short.status == SR.Cancelled) {
-                // TODO: can also check short.flaggerId != 0 if time hasn't passed
-                ghost_primaryMCCancelledShortCounter++;
-                return;
-            }
+        // bound inputs
+        index = bound(index, 1, shortRecords.length);
+        STypes.ShortRecord memory shortRecord = shortRecords[index - 1];
 
-            uint88 shortErcDebt = short.ercDebt;
-
-            int256 preMCPrice = int256(diamond.getOraclePriceT(asset).inv());
-
-            //@dev create ask for margin call
-            console.log(
-                string.concat(
-                    "fundLimitAskOpt(",
-                    vm.toString(uint80(diamond.getOraclePriceT(asset))),
-                    ",",
-                    vm.toString(shortErcDebt),
-                    ",",
-                    vm.toString(marginCaller),
-                    ");"
-                )
-            );
-            s_ob.fundLimitAskOpt(
-                uint80(diamond.getOraclePriceT(asset)), shortErcDebt, marginCaller
-            );
-
-            //@dev reduce price to margin call levels
-            console.log("setETH(1500 ether);");
-            s_ob.setETH(1500 ether);
-
-            console.log(string.concat("vm.prank(", vm.toString(marginCaller), ");"));
-            console.log(
-                string.concat(
-                    "diamond.flagShort",
-                    vm.toString(asset),
-                    ",",
-                    vm.toString(currentUser),
-                    ",",
-                    vm.toString(Constants.SHORT_STARTING_ID),
-                    ",",
-                    vm.toString(Constants.HEAD),
-                    ");"
-                )
-            );
-            vm.prank(marginCaller);
-            diamond.flagShort(
-                asset, currentUser, Constants.SHORT_STARTING_ID, Constants.HEAD
-            );
-
-            //for some reason, the skip and liquidate are not working together
-            skip(10 hours + 1 hours);
-            //@dev reset time to prevent stale oracle data
-            s_ob.setETH(1500 ether);
-
-            console.log(
-                string.concat(
-                    "liquidate(",
-                    vm.toString(currentUser),
-                    ",",
-                    vm.toString(Constants.SHORT_STARTING_ID),
-                    ",",
-                    vm.toString(marginCaller),
-                    ");"
-                )
-            );
-            s_ob.liquidate(currentUser, Constants.SHORT_STARTING_ID, marginCaller);
-
-            //@dev reset price back to original levels
-            s_ob.setETH(preMCPrice);
-
-            s_Users.add(marginCaller);
-            updateShorters();
-            ghost_primaryMCComplete++;
+        ghost_primaryMCSRGtZeroCounter++;
+        address marginCaller = currentUser;
+        if (marginCaller == currentShorter) {
+            ghost_primaryMCSameUserCounter++;
+            return;
         }
+
+        if (shortRecord.status == SR.Cancelled) {
+            ghost_primaryMCCancelledShortCounter++;
+            return;
+        }
+
+        int256 preMCPrice = int256(diamond.getOraclePriceT(asset).inv());
+
+        //@dev create ask for margin call
+        console.log(
+            string.concat(
+                "fundLimitAskOpt(",
+                vm.toString(uint80(diamond.getOraclePriceT(asset))),
+                ",",
+                vm.toString(shortRecord.ercDebt),
+                ",",
+                vm.toString(marginCaller),
+                ");"
+            )
+        );
+
+        //@dev Minting usd out of thin air for fundLimitAsk. Will break invariants unless burnt.
+        s_ob.fundLimitAskOpt(
+            uint80(diamond.getOraclePriceT(asset)), shortRecord.ercDebt, marginCaller
+        );
+
+        //@dev reduce price to margin call levels
+        console.log("setETH(1500 ether);");
+        s_ob.setETH(1500 ether);
+
+        console.log(string.concat("vm.prank(", vm.toString(marginCaller), ");"));
+        console.log(
+            string.concat(
+                "diamond.flagShort",
+                vm.toString(asset),
+                ",",
+                vm.toString(currentShorter),
+                ",",
+                vm.toString(shortRecord.id),
+                ",",
+                vm.toString(Constants.HEAD),
+                ");"
+            )
+        );
+        vm.prank(marginCaller);
+        diamond.flagShort(asset, currentShorter, shortRecord.id, Constants.HEAD);
+
+        //for some reason, the skip and liquidate are not working together
+        skip(10 hours + 1 hours);
+        //@dev reset time to prevent stale oracle data
+        s_ob.setETH(1500 ether);
+
+        console.log(
+            string.concat(
+                "liquidate(",
+                vm.toString(currentShorter),
+                ",",
+                vm.toString(shortRecord.id),
+                ",",
+                vm.toString(marginCaller),
+                ");"
+            )
+        );
+
+        s_ob.liquidate(currentShorter, shortRecord.id, marginCaller);
+        //@dev burn the ercDebt that was "minted out of thin air from fundLimitAsk
+        IAsset(asset).burnFrom(currentShorter, shortRecord.ercDebt);
+
+        //@dev reset price back to original levels
+        s_ob.setETH(preMCPrice);
+        updateShorters();
+        ghost_primaryMCComplete++;
+        ghost_oraclePrice = diamond.getOraclePriceT(asset);
     }
 
     function depositEth(uint8 addressSeed, uint88 amountIn) public {

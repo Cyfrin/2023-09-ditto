@@ -24,8 +24,8 @@ contract MarginCallSecondaryFacet is Modifiers {
 
     /**
      * @notice Liquidates short using liquidator's ercEscrowed or wallet
-     * @dev Secondary liquidation function, don't need flag
-     * @dev Must liquidate all of the debt, no partial (unless TAPP short)
+     * @dev Secondary liquidation function. Doesn't need flag
+     * @dev Must liquidate all of the debt. No partial (unless TAPP short)
      *
      * @param asset The market that will be impacted
      * @param batches Array of shorters and shortRecordIds to liquidate
@@ -160,7 +160,7 @@ contract MarginCallSecondaryFacet is Modifiers {
     // | c <= 1         | c             | 0       | 0     |
     // +----------------+---------------+---------+-------+
     function _secondaryLiquidationHelper(MTypes.MarginCallSecondary memory m) private {
-        // @dev when cRatio <= 1 liquidator eats loss, so it's expected that only tapp would call
+        // @dev when cRatio <= 1 liquidator eats loss, so it's expected that only TAPP would call
         m.liquidatorCollateral = m.short.collateral;
 
         if (m.cRatio > 1 ether) {
@@ -198,7 +198,7 @@ contract MarginCallSecondaryFacet is Modifiers {
         STypes.ShortRecord storage short =
             s.shortRecords[m.asset][address(this)][m.short.id];
         // Update erc balance
-        short.ercDebt -= m.short.ercDebt; // m.short.ercDebt was updated earlier to equal erc filled
+        short.ercDebt -= m.short.ercDebt; // @dev m.short.ercDebt was updated earlier to equal erc filled
         // Update eth balance
         // If c-ratio < 1 then it's possible to lose eth owed over short collateral
         m.liquidatorCollateral =

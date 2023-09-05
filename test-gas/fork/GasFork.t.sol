@@ -16,7 +16,7 @@ contract GasForkTest is ConstantsTest {
     AggregatorV3Interface public baseOracle =
         AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
 
-    //@dev: foundry test crashes unless we use latest block height
+    //@dev: foundry test crashes unless latest block height is used
     uint256 public forkBlock = 17_273_111;
 
     function setUp() public {

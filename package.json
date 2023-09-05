@@ -3,13 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "workspaces": [
+    "nextjs",
     "scripts/sol-to-isol"
   ],
   "scripts": {
     "coverage": "./scripts/coverage.sh",
+    "gen-abi": "cd nextjs && bun run gen-abi",
+    "dev": "cd nextjs && bun run dev",
     "anvil": "./scripts/anvil.sh",
     "deploy-local": "FOUNDRY_PROFILE=deploy-local forge script DeployDiamond --ffi --fork-url http://localhost:8545 --broadcast",
-    "postdeploy-local": "bun ./scripts/copyAddress.js && bun run gen-abi",
+    "postdeploy-local": "bun ./scripts/copyAddress.js && bun run gen-abi && bun run sigs",
     "gas": "bun ./scripts/createGasSnapshot.ts",
     "gas-compare": "git checkout main -- .gas.json && bun run test-gas",
     "invariant": "./scripts/invariant-reverts.sh && bun ./scripts/formatReverts.ts",
@@ -21,6 +24,7 @@
     "build": "bun run interfaces && forge build",
     "lint": "solhint contracts/**/*.sol test/**/*.sol test-gas/**/*.sol deploy/DeployDiamond.s.sol deploy/DeployHelper.sol",
     "typescript": "./node_modules/.bin/tsc --noEmit --project nextjs/tsconfig.json && ./node_modules/.bin/tsc --noEmit",
+    "sigs": "bun ./scripts/writeSignatures.ts",
     "interfaces": "bun ./scripts/sol-to-isol/bin.js",
     "interfaces-force": "bun ./scripts/sol-to-isol/bin.js --force"
   },

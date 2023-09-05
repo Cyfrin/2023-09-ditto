@@ -55,6 +55,7 @@ library Errors {
     error NotLastOrder();
     error NotMinted();
     error NotOwner();
+    error NotOwnerOrAdmin();
     error NotOwnerCandidate();
     error NoYield();
     error OrderIdCountTooLow();

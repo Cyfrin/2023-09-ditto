@@ -70,7 +70,7 @@ contract ReentrancyTest is OBFixture {
 
     function testReentrancyRedeemErc() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.expectRevert(Errors.ReentrantCall.selector);
         diamond.redeemErc(asset, 0, DEFAULT_AMOUNT);
     }

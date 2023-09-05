@@ -244,7 +244,7 @@ library LibShortRecord {
         nextId = guard.nextId;
         uint8 canceledId = guard.prevId;
         // @dev (ID) is exiting, [ID] is inserted
-        // in this case, we are re-using (ID) and moving it to [ID]
+        // in this case, the protocol re-uses (ID) and moves it to [ID]
         // check if a previously closed short exists
         if (canceledId > Constants.HEAD) {
             // BEFORE: CancelledID <- (ID) <- HEAD <-> .. <-> PREV <----------> NEXT

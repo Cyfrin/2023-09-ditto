@@ -9,7 +9,6 @@ import {
 contract STETH is ERC20, ERC20Permit {
     constructor() ERC20("Staked ETH", "stETH") ERC20Permit("Staked ETH") {}
 
-    // @dev mock doesn't need onlyOwner
     function mint(address to, uint256 amount) public {
         _mint(to, amount);
     }

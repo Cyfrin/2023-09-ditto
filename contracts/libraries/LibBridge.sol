@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.21;
 
-import {IBridge} from "contracts/interfaces/IBridge.sol";
-
-import {STypes} from "contracts/libraries/DataTypes.sol";
 import {AppStorage, appStorage} from "contracts/libraries/AppStorage.sol";
 import {Constants} from "contracts/libraries/Constants.sol";
-
 import {U256} from "contracts/libraries/PRBMathHelper.sol";
 
 // import {console} from "contracts/libraries/console.sol";

@@ -64,7 +64,6 @@ contract BridgeRouterFacet is Modifiers {
         emit Events.Deposit(bridge, msg.sender, zethAmount);
     }
 
-    //review triple check for reentrancy
     function depositEth(address bridge)
         external
         payable
@@ -142,7 +141,7 @@ contract BridgeRouterFacet is Modifiers {
 
     function withdrawTapp(address bridge, uint88 zethAmount)
         external
-        onlyOwner
+        onlyDAO
         onlyValidBridge(bridge)
     {
         if (zethAmount == 0) revert Errors.ParameterIsZero();

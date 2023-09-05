@@ -9,6 +9,7 @@ async function writeFile(path, contents) {
   await fs.writeFile(path, contents);
 }
 
+// copy deployed addresses from anvil to filePath for front end
 async function copyAddress() {
   const DEPLOY_DIR = ".deploy-snapshots";
   let dirPath = path.join(process.cwd(), DEPLOY_DIR);

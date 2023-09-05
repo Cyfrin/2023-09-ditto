@@ -1098,7 +1098,7 @@ contract YieldTest is OBFixture {
         vm.expectRevert(Errors.NoYield.selector);
         diamond.distributeYield(assets);
 
-        //skip time (+ 1 hours because we are operating in hours, not seconds)
+        //skip time (+ 1 hours because everything is operating in hours, not seconds)
         skip(yieldEligibleTime);
         diamond.distributeYield(assets);
     }

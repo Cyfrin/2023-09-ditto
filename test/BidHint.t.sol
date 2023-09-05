@@ -209,26 +209,6 @@ contract BidOrdersSortingTest is OBFixture {
         assertEq(getBids()[4].id, 104);
     }
 
-    //@dev Had errors in front end. Trying to see if error is with contract or front end by replicating front end actions
-    function testFrontEndReplication(uint80 fuzz_price) public {
-        vm.assume(fuzz_price > diamond.getAssetNormalizedStruct(asset).minBidEth);
-        vm.assume(fuzz_price < 1 ether);
-
-        depositEth(receiver, 1000000 ether);
-        vm.startPrank(receiver);
-
-        for (uint256 i = 0; i < 10; i++) {
-            diamond.createBid(
-                asset,
-                fuzz_price,
-                DEFAULT_AMOUNT,
-                Constants.LIMIT_ORDER,
-                diamond.getHintArray(asset, fuzz_price, O.LimitBid),
-                shortHintArrayStorage
-            );
-        }
-    }
-
     function testAddBestBidNotUsingOrderHint() public {
         createBidsInMarket();
         vm.stopPrank();
@@ -298,7 +278,7 @@ contract BidOrdersSortingTest is OBFixture {
         );
     }
 
-    //@dev what happens if we pass in a hintId of a matached order?
+    //@dev what happens if hint Id of a matched order is passed?
     function testRevertFindOrderHintIdMatchedHint() public {
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
@@ -321,7 +301,7 @@ contract BidOrdersSortingTest is OBFixture {
         );
     }
 
-    //@dev what happens if we pass in a hintId of a cancelled order?
+    //@dev what happens if hintId of a cancelled order is passed?
     function testRevertFindOrderHintIdCancelledHint() public {
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);

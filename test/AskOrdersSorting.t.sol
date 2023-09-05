@@ -18,8 +18,7 @@ contract AskOrdersSortingTest is OBFixture {
     bool internal constant ASK = true;
     bool internal constant SHORT = false;
 
-    //@dev: Technically, this test file might not be necessary since we split up ask and short into separate mappings
-
+    //@dev: Technically, this test file might not be necessary since the protocol split up ask and short into separate mappings
     function setUp() public override {
         super.setUp();
     }

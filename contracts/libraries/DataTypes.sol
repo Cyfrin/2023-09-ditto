@@ -62,7 +62,7 @@ library STypes {
         uint8 shortRecordId; // @dev only used for LimitShort
         // SLOT 2: 160 + 32 = 192 (64 unused)
         address addr; // 160
-        // @dev to prevent overflow in 2106, we diff against contract creation timestamp
+        // @dev diff against contract creation timestamp to prevent overflow in 2106
         uint32 creationTime; // seconds
         uint64 filler;
     }

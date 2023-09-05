@@ -10,7 +10,6 @@ node_modules
 /renamed
 .forge-snapshots
 .deploy-snapshots
-.signatures.json
 
 # coverage
 *.info

@@ -12,7 +12,7 @@ jobs:
       - name: Setup Bun
         uses: https://github.com/oven-sh/setup-bun@v1
         with:
-          bun-version: "0.7.1"
+          bun-version: "0.8.1"
 
       - run: bun install
       - run: bun run lint
@@ -51,4 +51,4 @@ jobs:
       - name: forge-test-statefulFuzz
         env:
           MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
-        run: timeout 100s bun run invariant
+        run: timeout 180s bun run invariant

@@ -28,7 +28,7 @@ contract FreezeFunctionsTest is OBFixture {
         makeShorts();
 
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         combineShorts({
@@ -43,7 +43,7 @@ contract FreezeFunctionsTest is OBFixture {
         });
 
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Unfrozen);
+        diamond.setFrozenT(asset, F.Unfrozen);
         vm.prank(sender);
         combineShorts({
             id1: Constants.SHORT_STARTING_ID,
@@ -54,7 +54,7 @@ contract FreezeFunctionsTest is OBFixture {
     function testFreezeIncreaseCollateral() public {
         makeShorts();
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         increaseCollateral(Constants.SHORT_STARTING_ID, 1 ether);
@@ -63,7 +63,7 @@ contract FreezeFunctionsTest is OBFixture {
     function testFreezeDecreaseCollateral() public {
         makeShorts();
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         decreaseCollateral(Constants.SHORT_STARTING_ID, 1 ether);
@@ -71,7 +71,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeCreateAsk() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         createLimitAsk(1 ether, 1 ether);
@@ -79,7 +79,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeCreateLimitShort() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
 
@@ -95,7 +95,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeCreateBid() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         createLimitBid(1 ether, 1 ether);
@@ -103,7 +103,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeExitShort() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(_exitShort);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         diamond.exitShort(asset, 0, 2 ether, 1, shortHintArrayStorage);
@@ -111,7 +111,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeExitShortWallet() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(_exitShort);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         diamond.exitShortWallet(asset, 1, 1);
@@ -119,7 +119,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeExitShortErcEscrowed() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(_exitShort);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         diamond.exitShortErcEscrowed(asset, 1, 1);
@@ -127,7 +127,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeLiquidate() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         diamond.liquidate(asset, sender, 1, shortHintArrayStorage);
@@ -135,7 +135,7 @@ contract FreezeFunctionsTest is OBFixture {
 
     function testFreezeMintNFT() public {
         vm.prank(owner);
-        diamond.setFrozen(asset, F.Permanent);
+        diamond.setFrozenT(asset, F.Permanent);
         vm.prank(sender);
         vm.expectRevert(Errors.AssetIsFrozen.selector);
         diamond.mintNFT(asset, 2);

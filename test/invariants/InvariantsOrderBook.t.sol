@@ -47,6 +47,7 @@ contract Invariants is Test {
         vault = Vault.CARBON;
 
         s_handler = new Handler(ob);
+        //@dev duplicate the selector to increase the distribution of certain handler calls
         selectors = [
             // Bridge
             Handler.deposit.selector,
@@ -54,7 +55,12 @@ contract Invariants is Test {
             Handler.withdraw.selector,
             // OrderBook
             Handler.createLimitBid.selector,
+            Handler.createLimitBid.selector,
+            Handler.createLimitBid.selector,
             Handler.createLimitAsk.selector,
+            Handler.createLimitShort.selector,
+            Handler.createLimitShort.selector,
+            Handler.createLimitShort.selector,
             Handler.createLimitShort.selector,
             Handler.cancelOrder.selector,
             // Yield
@@ -376,7 +382,7 @@ contract Invariants is Test {
         );
         assertGe(
             diamond.getAssetNormalizedStruct(asset).orderId,
-            s_handler.getGhostOrderId(),
+            s_handler.ghost_orderId(),
             "statefulFuzz_orderIdGtMarketDepth_2"
         );
     }
@@ -384,7 +390,7 @@ contract Invariants is Test {
     function statefulFuzz_oracleTimeAlwaysIncrease() public {
         assertGe(
             diamond.getOracleTimeT(asset),
-            s_handler.getGhostOracleTime(),
+            s_handler.ghost_oracleTime(),
             "statefulFuzz_oracleTimeAlwaysIncrease_1"
         );
     }
@@ -395,7 +401,7 @@ contract Invariants is Test {
         if (startingShortId > Constants.HEAD) {
             assertGe(
                 startingShort.price,
-                s_handler.getGhostOraclePrice(),
+                s_handler.ghost_oraclePrice(),
                 "statefulFuzz_startingShortPriceGteOraclePrice_1"
             );
         }
@@ -623,6 +629,7 @@ contract Invariants is Test {
         assertEq(vaultShares, totalUserShares, "statefulFuzz_dittoMatchedShares_1");
     }
 
+    //@dev Cannot used fundLimitOrders because it will mint assets without going through orderbook
     function statefulFuzz_Vault_ErcEscrowedPlusAssetBalanceEqTotalDebt() public {
         address[] memory users = s_handler.getUsers();
         IAsset assetContract = IAsset(asset);
@@ -651,7 +658,7 @@ contract Invariants is Test {
         assertEq(ercEscrowed + assetBalance, totalDebt);
     }
 
-    // @dev this will be zero until we put updateYield() in handler
+    // @dev this will be zero until updateYield() is put in handler
     // function statefulFuzz_zethCollateralRewardAlwaysIncreases() public {
     // vm.writeLine(
     //     "./test/invariants/inputs",
@@ -670,7 +677,7 @@ contract Invariants is Test {
     // );
     // }
 
-    //@dev this will be zero until we put updateYield() in handler
+    //@dev this will be zero until updateYield() is put in handler
     // function statefulFuzz_zethYieldRateAlwaysIncreases() public {
     //     vm.writeLine(
     //         "./test/invariants/inputs", vm.toString(s_handler.getGhostZethYieldRate())
@@ -681,8 +688,70 @@ contract Invariants is Test {
     //     );
     //     vm.writeLine("./test/invariants/inputs", "----");
     //     assertGe(
-    //         diamond.getVaultStruct(vault).zethYieldRate,
-    //         s_handler.getGhostZethYieldRate()
+    //         diamond.getVaultStruct(vault).zethYieldRate, s_handler.getGhostZethYieldRate()
+    //     );
+    // }
+
+    // function statefulFuzz_Short_BlankReturnCounter() public {
+    //     // vm.writeLine(
+    //     //     "./test/invariants/inputs",
+    //     //     string.concat(
+    //     //         "ghost_secondaryMC: ", vm.toString(s_handler.ghost_secondaryMC())
+    //     //     )
+    //     // );
+
+    //     // vm.writeLine(
+    //     //     "./test/invariants/inputs",
+    //     //     string.concat(
+    //     //         "ghost_secondaryMCSameUserCounter: ",
+    //     //         vm.toString(s_handler.ghost_secondaryMCSameUserCounter())
+    //     //     )
+    //     // );
+
+    //     // vm.writeLine(
+    //     //     "./test/invariants/inputs",
+    //     //     string.concat(
+    //     //         "ghost_secondaryMCCancelledShortCounter: ",
+    //     //         vm.toString(s_handler.ghost_secondaryMCCancelledShortCounter())
+    //     //     )
+    //     // );
+
+    //     // vm.writeLine(
+    //     //     "./test/invariants/inputs",
+    //     //     string.concat(
+    //     //         "ghost_secondaryMCComplete: ",
+    //     //         vm.toString(s_handler.ghost_secondaryMCComplete())
+    //     //     )
+    //     // );
+
+    //     ////
+    //     vm.writeLine(
+    //         "./test/invariants/inputs",
+    //         string.concat("ghost_primaryMC: ", vm.toString(s_handler.ghost_primaryMC()))
+    //     );
+
+    //     vm.writeLine(
+    //         "./test/invariants/inputs",
+    //         string.concat(
+    //             "ghost_primaryMCSameUserCounter: ",
+    //             vm.toString(s_handler.ghost_primaryMCSameUserCounter())
+    //         )
+    //     );
+
+    //     vm.writeLine(
+    //         "./test/invariants/inputs",
+    //         string.concat(
+    //             "ghost_primaryMCCancelledShortCounter: ",
+    //             vm.toString(s_handler.ghost_primaryMCCancelledShortCounter())
+    //         )
+    //     );
+
+    //     vm.writeLine(
+    //         "./test/invariants/inputs",
+    //         string.concat(
+    //             "ghost_primaryMCComplete: ",
+    //             vm.toString(s_handler.ghost_primaryMCComplete())
+    //         )
     //     );
     // }
 }

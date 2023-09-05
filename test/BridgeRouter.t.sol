@@ -356,7 +356,7 @@ contract BridgeRouterTest is OBFixture {
         diamond.withdraw(_bridgeSteth, withdrawAmount);
         diamond.withdraw(_bridgeReth, withdrawAmount);
 
-        // Only rocketpool has fee for withdrawal in our tests
+        // Only rocketpool has fee for withdrawal in the tests
         uint256 rethFee = diamond.getBridgeNormalizedStruct(_bridgeReth).withdrawalFee.mul(
             withdrawAmount
         );

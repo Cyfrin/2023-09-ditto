@@ -85,7 +85,7 @@ contract MarginCallGeneralTest is MarginCallHelper {
         MarginCallStruct memory m =
             simulateLiquidation(r, s, 2666 ether, receiver, sender);
 
-        // +default price because of what was received from fundLimitAsk
+        // + default price because of what was received from fundLimitAsk
         r.ethEscrowed = DEFAULT_PRICE.mul(DEFAULT_AMOUNT) + m.gasFee + m.callerFee;
         assertStruct(receiver, r);
         assertTrue(m.gasFee > 0);

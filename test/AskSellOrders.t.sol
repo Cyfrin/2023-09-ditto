@@ -18,8 +18,8 @@ contract SellOrdersTest is OBFixture {
     function setUp() public override {
         super.setUp();
     }
-    //HELPERS
 
+    //HELPERS
     function createBidsAtDefaultPrice() public {
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
@@ -50,8 +50,8 @@ contract SellOrdersTest is OBFixture {
         // Asset level ercDebt
         assertEq(diamond.getAssetStruct(asset).ercDebt, 0);
     }
-    //Matching Orders
 
+    //Matching Orders
     function testAddingSellWithNoBids() public {
         fundLimitAskOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender);
 
@@ -235,8 +235,8 @@ contract SellOrdersTest is OBFixture {
         fundMarketAsk(DEFAULT_PRICE, DEFAULT_AMOUNT, sender);
         assertEq(getAsks().length, 0);
     }
-    //OrderType and prevOrderType
 
+    //OrderType and prevOrderType
     function testPrevOrderTypeCancelledAsk() public {
         fundLimitAskOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender);
         assertTrue(getAsks()[0].orderType == O.LimitAsk);

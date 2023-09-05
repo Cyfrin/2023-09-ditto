@@ -209,7 +209,7 @@ library LibOrders {
         uint16 id = incomingOrder.id;
         uint16 canceledID = orders[asset][Constants.HEAD].prevId;
         // @dev (ID) is exiting, [ID] is inserted
-        // in this case, we are re-using (ID) and moving it to [ID]
+        // in this case, the protocol is re-using (ID) and moving it to [ID]
         // check if a previously cancelled or matched order exists
         if (canceledID != Constants.HEAD) {
             incomingOrder.prevOrderType = orders[asset][canceledID].orderType;
@@ -336,7 +336,7 @@ library LibOrders {
 
     /**
      * @notice moves the matched id to the prev side of HEAD
-     * @dev this is how we re-use an id
+     * @dev this is how an id gets re-used
      *
      * @param orders the order mapping
      * @param asset The market that will be impacted
@@ -555,7 +555,7 @@ library LibOrders {
 
     /**
      * @notice Helper function for updating the asks/shorts mapping when matched by incomingBid
-     * @dev firstShortId isn't necessarily HEAD because we start matching from oracle price
+     * @dev firstShortId isn't necessarily HEAD because orders start matching from oracle price
      *
      * @param asset The market that will be impacted
      * @param b Memory based struct passed from BidMatchAlgo
@@ -620,6 +620,7 @@ library LibOrders {
      * @param asset The market that will be impacted
      * @param incomingAsk Newly created ask struct
      * @param orderHintArray Id passed in from front end for optimized looping
+     * @param minAskEth Minimum ask dust amount
      *
      */
 

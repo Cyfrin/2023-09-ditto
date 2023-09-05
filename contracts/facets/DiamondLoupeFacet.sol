@@ -6,6 +6,7 @@ pragma solidity 0.8.21;
 import {LibDiamond} from "contracts/libraries/LibDiamond.sol";
 import {IDiamondLoupe} from "contracts/interfaces/IDiamondLoupe.sol";
 
+/* solhint-disable no-inline-assembly */
 contract DiamondLoupeFacet is IDiamondLoupe {
     // Diamond Loupe Functions
     ////////////////////////////////////////////////////////////////////

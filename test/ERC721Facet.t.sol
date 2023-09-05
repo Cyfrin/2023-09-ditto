@@ -251,7 +251,6 @@ contract ERC721Test is OBFixture {
     }
 
     //Approve
-
     function test_Revert_Approve_ERC721InvalidOperator() public {
         createShortAndMintNFT();
         vm.prank(sender);
@@ -349,7 +348,6 @@ contract ERC721Test is OBFixture {
     }
 
     ///NON-REVERT
-
     //Mint
     function test_BalanceOf_Mint2NFT() public {
         createShortAndMintNFT();

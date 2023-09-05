@@ -30,7 +30,7 @@ contract VaultFacet is Modifiers {
     /**
      * @notice Deposit ZETH token into market system
      * @dev No event needed. Use the transfer event emitted in burnFrom
-     * @param amount deposit amount
+     * @param amount Deposit amount
      */
     function depositZETH(address zeth, uint88 amount) external nonReentrant {
         if (amount == 0) revert Errors.PriceOrAmountIs0();
@@ -48,10 +48,10 @@ contract VaultFacet is Modifiers {
 
     /**
      * @notice Deposit ERC20 token into market system
-     * @dev if frozen, prevent asset deposit
+     * @dev If frozen, prevent asset deposit
      * No event needed. Use the transfer event emitted in burnFrom
-     * @param asset asset address
-     * @param amount deposit amount
+     * @param asset Asset address
+     * @param amount Deposit amount
      */
     function depositAsset(address asset, uint104 amount)
         external
@@ -68,7 +68,7 @@ contract VaultFacet is Modifiers {
     /**
      * @notice Withdraw ZETH from market system
      *
-     * @param amount withdrawal amount
+     * @param amount Withdrawal amount
      */
     function withdrawZETH(address zeth, uint88 amount) external nonReentrant {
         if (amount == 0) revert Errors.PriceOrAmountIs0();
@@ -91,8 +91,8 @@ contract VaultFacet is Modifiers {
     /**
      * @notice Withdraw ERC20 token from market system
      *
-     * @param asset asset address
-     * @param amount withdrawal amount
+     * @param asset Asset address
+     * @param amount Withdrawal amount
      */
     function withdrawAsset(address asset, uint104 amount)
         external

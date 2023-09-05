@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 
+// check foundry version
 async function checkForgeVersion(throwError = true) {
   let ciVersion = "";
   let localVersion = "";

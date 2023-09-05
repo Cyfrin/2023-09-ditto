@@ -12,7 +12,7 @@ import {LibAsset} from "contracts/libraries/LibAsset.sol";
 import {LibOracle} from "contracts/libraries/LibOracle.sol";
 import {Constants} from "contracts/libraries/Constants.sol";
 
-import {console} from "contracts/libraries/console.sol";
+// import {console} from "contracts/libraries/console.sol";
 
 contract ShortOrdersFacet is Modifiers {
     using U256 for uint256;
@@ -20,7 +20,6 @@ contract ShortOrdersFacet is Modifiers {
     using U80 for uint80;
 
     /**
-     * /**
      * @notice Creates limit short in market system
      * @dev incomingShort created here instead of AskMatchAlgo to prevent stack too deep
      * @dev Shorts can only be limits
@@ -30,7 +29,7 @@ contract ShortOrdersFacet is Modifiers {
      * @param ercAmount Amount of erc minted and sold
      * @param orderHintArray Array of hint ID for gas-optimized sorted placement on market
      * @param shortHintArray Array of hint ID for gas-optimized short matching above oracle price
-     * @param initialCR initial Collateral Ratio for a short order, between min/max, converted to uint8
+     * @param initialCR Initial Collateral Ratio for a short order, between min/max, converted to uint8
      */
     function createLimitShort(
         address asset,

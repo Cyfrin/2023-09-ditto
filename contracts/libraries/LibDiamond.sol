@@ -230,7 +230,7 @@ library LibDiamond {
                 }
                 if (oldSelectorsSlotCount != selectorSlotCount) {
                     bytes32 oldSelectorSlot = ds.selectorSlots[oldSelectorsSlotCount];
-                    // clears the selector we are deleting and puts the last selector in its place.
+                    // clears the selector being deleted and puts the last selector in its place.
                     oldSelectorSlot = (
                         oldSelectorSlot
                             & ~(CLEAR_SELECTOR_MASK >> oldSelectorInSlotPosition)
@@ -238,7 +238,7 @@ library LibDiamond {
                     // update storage with the modified slot
                     ds.selectorSlots[oldSelectorsSlotCount] = oldSelectorSlot;
                 } else {
-                    // clears the selector we are deleting and puts the last selector in its place.
+                    // clears the selector being deleted and puts the last selector in its place.
                     _selectorSlot = (
                         _selectorSlot
                             & ~(CLEAR_SELECTOR_MASK >> oldSelectorInSlotPosition)

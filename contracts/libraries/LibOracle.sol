@@ -19,8 +19,8 @@ library LibOracle {
 
     function getOraclePrice(address asset) internal view returns (uint256) {
         AppStorage storage s = appStorage();
-        AggregatorV3Interface baseOracle = AggregatorV3Interface(s.oracle);
-        uint256 oraclePrice = getPrice(asset);
+        AggregatorV3Interface baseOracle = AggregatorV3Interface(s.baseOracle);
+        uint256 protocolPrice = getPrice(asset);
         // prettier-ignore
         (
             uint80 baseRoundID,
@@ -31,17 +31,18 @@ library LibOracle {
             /*uint80 baseAnsweredInRound*/
         ) = baseOracle.latestRoundData();
 
-        //@dev multiply base oracle by 10**10 to give it 18 decimals of precision
-        uint256 basePriceInv =
-            basePrice > 0 ? uint256(basePrice * Constants.BASE_ORACLE_DECIMALS).inv() : 0;
-        basePriceInv = oracleCircuitBreaker(
-            oraclePrice, baseRoundID, basePrice, baseTimeStamp, basePriceInv
-        );
         AggregatorV3Interface oracle = AggregatorV3Interface(s.asset[asset].oracle);
         if (address(oracle) == address(0)) revert Errors.InvalidAsset();
 
         if (oracle == baseOracle) {
-            return basePriceInv;
+            //@dev multiply base oracle by 10**10 to give it 18 decimals of precision
+            uint256 basePriceInEth = basePrice > 0
+                ? uint256(basePrice * Constants.BASE_ORACLE_DECIMALS).inv()
+                : 0;
+            basePriceInEth = baseOracleCircuitBreaker(
+                protocolPrice, baseRoundID, basePrice, baseTimeStamp, basePriceInEth
+            );
+            return basePriceInEth;
         } else {
             // prettier-ignore
             (
@@ -52,28 +53,29 @@ library LibOracle {
                 uint256 timeStamp,
                 /*uint80 answeredInRound*/
             ) = oracle.latestRoundData();
-            uint256 priceInv = uint256(price).div(uint256(basePrice));
-            priceInv =
-                oracleCircuitBreaker(oraclePrice, roundID, price, timeStamp, priceInv);
-            return priceInv;
+            uint256 priceInEth = uint256(price).div(uint256(basePrice));
+            oracleCircuitBreaker(
+                roundID, baseRoundID, price, basePrice, timeStamp, baseTimeStamp
+            );
+            return priceInEth;
         }
     }
 
-    function oracleCircuitBreaker(
-        uint256 oraclePrice,
+    function baseOracleCircuitBreaker(
+        uint256 protocolPrice,
         uint80 roundId,
         int256 chainlinkPrice,
         uint256 timeStamp,
-        uint256 chainlinkPriceInv
-    ) private view returns (uint256 _oraclePrice) {
+        uint256 chainlinkPriceInEth
+    ) private view returns (uint256 _protocolPrice) {
         bool invalidFetchData = roundId == 0 || timeStamp == 0
             || timeStamp > block.timestamp || chainlinkPrice <= 0
             || block.timestamp > 2 hours + timeStamp;
-        uint256 chainlinkDiff = chainlinkPriceInv > oraclePrice
-            ? chainlinkPriceInv - oraclePrice
-            : oraclePrice - chainlinkPriceInv;
+        uint256 chainlinkDiff = chainlinkPriceInEth > protocolPrice
+            ? chainlinkPriceInEth - protocolPrice
+            : protocolPrice - chainlinkPriceInEth;
         bool priceDeviation =
-            oraclePrice > 0 && chainlinkDiff.div(oraclePrice) > 0.5 ether;
+            protocolPrice > 0 && chainlinkDiff.div(protocolPrice) > 0.5 ether;
 
         //@dev if there is issue with chainlink, get twap price. Compare twap and chainlink
         if (invalidFetchData || priceDeviation) {
@@ -89,12 +91,12 @@ library LibOracle {
             if (invalidFetchData) {
                 return twapPriceInv;
             } else {
-                uint256 twapDiff = twapPriceInv > oraclePrice
-                    ? twapPriceInv - oraclePrice
-                    : oraclePrice - twapPriceInv;
+                uint256 twapDiff = twapPriceInv > protocolPrice
+                    ? twapPriceInv - protocolPrice
+                    : protocolPrice - twapPriceInv;
                 //@dev save the price that is closest to saved oracle price
                 if (chainlinkDiff <= twapDiff) {
-                    return chainlinkPriceInv;
+                    return chainlinkPriceInEth;
                 }
                 //@dev In case USDC_WETH suddenly has no liquidity
                 IERC20 weth = IERC20(Constants.WETH);
@@ -103,13 +105,30 @@ library LibOracle {
                 return twapPriceInv;
             }
         } else {
-            return chainlinkPriceInv;
+            return chainlinkPriceInEth;
         }
     }
 
-    // @dev Constants.HEAD to marks the start/end of the linked list, so the only properties needed are id/nextId/prevId
-    // @dev using helper methods to set the values of oraclePrice and oracleTime
-    // @dev since we are setting them to different properties
+    function oracleCircuitBreaker(
+        uint80 roundId,
+        uint80 baseRoundId,
+        int256 chainlinkPrice,
+        int256 baseChainlinkPrice,
+        uint256 timeStamp,
+        uint256 baseTimeStamp
+    ) private view {
+        bool invalidFetchData = roundId == 0 || timeStamp == 0
+            || timeStamp > block.timestamp || chainlinkPrice <= 0 || baseRoundId == 0
+            || baseTimeStamp == 0 || baseTimeStamp > block.timestamp
+            || baseChainlinkPrice <= 0;
+
+        if (invalidFetchData) revert Errors.InvalidPrice();
+    }
+
+    /* 
+    @dev Constants.HEAD to marks the start/end of the linked list, so the only properties needed are id/nextId/prevId.
+    Helper methods are used to set the values of oraclePrice and oracleTime since they are set to different properties
+    */
     function setPriceAndTime(address asset, uint256 oraclePrice, uint32 oracleTime)
         internal
     {
@@ -118,13 +137,13 @@ library LibOracle {
         s.bids[asset][Constants.HEAD].creationTime = oracleTime;
     }
 
-    //@dev we are intentionally using creationTime for oracleTime.
+    //@dev Intentionally using creationTime for oracleTime.
     function getTime(address asset) internal view returns (uint256 creationTime) {
         AppStorage storage s = appStorage();
         return s.bids[asset][Constants.HEAD].creationTime;
     }
 
-    //@dev we are intentionally using ercAmount for oraclePrice. Storing as price may lead to bugs in the match algos.
+    //@dev Intentionally using ercAmount for oraclePrice. Storing as price may lead to bugs in the match algos.
     function getPrice(address asset) internal view returns (uint80 oraclePrice) {
         AppStorage storage s = appStorage();
         return uint80(s.bids[asset][Constants.HEAD].ercAmount);

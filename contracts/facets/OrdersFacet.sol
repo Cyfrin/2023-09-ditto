@@ -110,10 +110,10 @@ contract OrdersFacet is Modifiers {
         if (id == Asset.startingShortId) {
             uint256 oraclePrice = LibOracle.getPrice(asset);
             uint256 prevPrice = s.shorts[asset][short.prevId].price;
-            if (short.price >= oraclePrice && prevPrice < oraclePrice) {
-                Asset.startingShortId = short.nextId;
-            } else if (prevPrice >= oraclePrice) {
+            if (prevPrice >= oraclePrice) {
                 Asset.startingShortId = short.prevId;
+            } else {
+                Asset.startingShortId = short.nextId;
             }
         }
 

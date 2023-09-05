@@ -8,20 +8,22 @@ import {IDiamondLoupe} from "contracts/interfaces/IDiamondLoupe.sol";
 import {IDiamondCut} from "contracts/interfaces/IDiamondCut.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-// import {console} from "contracts/libraries/console.sol";
 import {AppStorage} from "contracts/libraries/AppStorage.sol";
 import {Errors} from "contracts/libraries/Errors.sol";
 import {Constants} from "contracts/libraries/Constants.sol";
-import {STypes} from "contracts/libraries/DataTypes.sol";
 
 // See https://github.com/mudgen/diamond-2-hardhat/blob/main/contracts/Diamond.sol
+// All code taken from diamond implementation, other than init code
 
 contract Diamond {
     AppStorage internal s;
 
-    constructor(address _contractOwner, address _diamondCutFacet) payable {
+    constructor(address _contractOwner, address _diamondCutFacet, address _baseOracle)
+        payable
+    {
         require(_contractOwner != address(0), "Diamond: owner can't be address(0)");
         LibDiamond.setContractOwner(_contractOwner);
+        s.admin = _contractOwner;
 
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
@@ -41,13 +43,15 @@ contract Diamond {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC721).interfaceId] = true;
 
+        // @dev init code
         // reentrantStatus needs to be initialized or else the first time nonreentrant is called reentrancy is possible
         s.reentrantStatus = Constants.NOT_ENTERED;
         // initialize to set slot
-
         s.tokenIdCounter = s.flaggerIdCounter = Constants.HEAD;
         s.name = "DITTO_NFT";
         s.symbol = "DNFT";
+        require(_baseOracle != address(0), "Base oracle can't be address(0)");
+        s.baseOracle = _baseOracle;
     }
 
     // Find facet for function that is called and execute the

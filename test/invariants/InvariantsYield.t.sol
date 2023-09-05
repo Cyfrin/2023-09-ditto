@@ -2,15 +2,12 @@
 pragma solidity 0.8.21;
 
 import {U256, U80, U88} from "contracts/libraries/PRBMathHelper.sol";
-import {Constants} from "contracts/libraries/Constants.sol";
-import {STypes, O, SR} from "contracts/libraries/DataTypes.sol";
 
 import {Test} from "forge-std/Test.sol";
 
 import {IOBFixture} from "interfaces/IOBFixture.sol";
 import {IDiamond} from "interfaces/IDiamond.sol";
 
-import {LibOrders} from "contracts/libraries/LibOrders.sol";
 import {Vault} from "contracts/libraries/Constants.sol";
 import {Handler} from "./Handler.sol";
 
@@ -31,7 +28,7 @@ contract InvariantsYield is Test {
     bytes4[] public selectors;
 
     //@dev Used for one test: statefulFuzz_allOrderIdsUnique
-    mapping(uint16 id => uint256 cnt) orderIdMapping;
+    mapping(uint16 id => uint256 cnt) public orderIdMapping;
 
     function setUp() public {
         IOBFixture ob = IOBFixture(deployCode("OBFixture.sol"));

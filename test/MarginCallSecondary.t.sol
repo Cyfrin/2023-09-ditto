@@ -354,7 +354,7 @@ contract MarginCallSecondaryTest is MarginCallHelper {
             _ercDebt: 0,
             _ercDebtAsset: 0,
             _ercDebtRateAsset: 0,
-            _ercAsset: 0 //vault bal = 0 because we burned existing erc
+            _ercAsset: 0 //vault bal = 0 because existing erc is burned
         });
     }
 
@@ -429,7 +429,7 @@ contract MarginCallSecondaryTest is MarginCallHelper {
             _ercDebt: 0,
             _ercDebtAsset: 0,
             _ercDebtRateAsset: 0,
-            _ercAsset: 0 //vault bal = 0 because we burned existing erc
+            _ercAsset: 0 //vault bal = 0 because existing erc is burned
         });
     }
 
@@ -503,7 +503,7 @@ contract MarginCallSecondaryTest is MarginCallHelper {
             _ercDebt: 0,
             _ercDebtAsset: 0,
             _ercDebtRateAsset: 0,
-            _ercAsset: 0 //vault bal = 0 because we burned existing erc
+            _ercAsset: 0 //vault bal = 0 because existing erc is burned
         });
     }
 

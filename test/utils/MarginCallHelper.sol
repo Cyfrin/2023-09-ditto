@@ -10,7 +10,7 @@ import {Vault} from "contracts/libraries/Constants.sol";
 import {OBFixture} from "test/utils/OBFixture.sol";
 import {TestTypes} from "test/utils/TestTypes.sol";
 
-import {console} from "contracts/libraries/console.sol";
+// import {console} from "contracts/libraries/console.sol";
 
 contract MarginCallHelper is OBFixture {
     using U256 for uint256;

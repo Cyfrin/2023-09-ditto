@@ -30,8 +30,8 @@ contract ShortRecordFacet is Modifiers {
      * @notice Increases collateral of an active short
      *
      * @param asset The market that will be impacted
-     * @param id id of short
-     * @param amount eth amount to increase collateral by
+     * @param id Id of short
+     * @param amount Eth amount to increase collateral by
      *
      */
 
@@ -71,11 +71,11 @@ contract ShortRecordFacet is Modifiers {
 
     /**
      * @notice Decrease collateral of an active short
-     * @dev Can't decrease below initial margin
+     * @dev Cannot decrease below initial margin
      *
      * @param asset The market that will be impacted
-     * @param id id of short
-     * @param amount eth amount to decrease collateral by
+     * @param id Id of short
+     * @param amount Eth amount to decrease collateral by
      *
      */
 
@@ -110,7 +110,7 @@ contract ShortRecordFacet is Modifiers {
      * @dev If any shorts are flagged the resulting short must have c-ratio > primaryLiquidationCR
      *
      * @param asset The market that will be impacted
-     * @param ids array of short ids to be combined
+     * @param ids Array of short ids to be combined
      *
      */
 
@@ -160,7 +160,7 @@ contract ShortRecordFacet is Modifiers {
             }
 
             if (currentShort.tokenId != 0) {
-                //@dev We require the first short to have NFT so we don't need to burn and re-mint
+                //@dev First short needs to have NFT so there isn't a need to burn and re-mint
                 if (firstShort.tokenId == 0) {
                     revert Errors.FirstShortMustBeNFT();
                 }

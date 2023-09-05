@@ -138,6 +138,21 @@ contract ShortHintIdTest is OBFixture {
         assertEq(diamond.getAssetStruct(asset).startingShortId, 1);
     }
 
+    function testUpdateStartingShortIdAfterCancelStartingShortBelowOracle() public {
+        fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender); //100
+        fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender); //101
+        fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender); //102
+
+        assertEq(diamond.getAssetStruct(asset).startingShortId, 100);
+
+        _setETHChainlinkOnly(3999 ether); // All short orders under oracle now
+        fundLimitBidOpt(DEFAULT_PRICE * 10, DEFAULT_AMOUNT, receiver);
+
+        vm.prank(sender);
+        cancelShort(100);
+        assertEq(diamond.getAssetStruct(asset).startingShortId, 1);
+    }
+
     function testUpdateStartingShortIdAfterCancelShortNotStartingShort() public {
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender); //100
         fundLimitShortOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender); //101
@@ -375,7 +390,7 @@ contract ShortHintIdTest is OBFixture {
     }
 
     function testShortOrdersEmptyOrAllShortsUnderOraclePrice() public {
-        //create ask so we don't revert early
+        //create ask so it doesn't revert early
         fundLimitAskOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, sender);
         fundLimitBidOpt(DEFAULT_PRICE, DEFAULT_AMOUNT, receiver);
         assertEq(diamond.getAssetStruct(asset).startingShortId, 1); //set to HEAD

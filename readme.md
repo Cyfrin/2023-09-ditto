@@ -1,3 +1,31 @@
+# Ditto 
+
+<!-- <br/>
+<p align="center">
+<img src="./logo.png" width="500" alt="Ditto">
+</p>
+<br/> --> 
+
+
+## Contest Details 
+
+- Total Prize Pool: $55,000
+  - HM Awards: $50,000
+  - Low Awards: $5,000
+  - No GAS, Informational, or QAs
+- Starts September 8, 2023
+- Ends Oct 8th, 2023
+
+## Stats
+- nSLOC: ~3365
+- Complexity Score: ~1682
+- Dollars per Complexity: ~$33
+- Dollars per nSLOC: ~$16
+
+# About the Project
+
+- [Docs](https://dittoeth.com/)
+
 # OrderBook
 
 ## Scope (contracts)

@@ -1,0 +1,9 @@
+forge-std/=lib/forge-std/src/
+ds-test/=lib/forge-std/lib/ds-test/src/
+interfaces/=interfaces/
+contracts/=contracts/
+test/=test/
+test-gas/=test-gas/
+deploy/=deploy/
+@openzeppelin/=node_modules/@openzeppelin/
+@chainlink/=node_modules/@chainlink/

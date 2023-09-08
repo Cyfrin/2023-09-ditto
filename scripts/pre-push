@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# run tests and lint before push
+protected_branch='master'
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+if [ $protected_branch = $current_branch ]
+then
+    echo "${protected_branch} is a protected branch, create PR to merge"
+    exit 1 # push will not execute
+fi
+
+echo "*****Running unit tests******"
+
+if ! [ -x "$(command -v forge)" ]; then
+  echo 'Error: forge is not installed. Install with:\ncurl -L https://foundry.paradigm.xyz | bash' >&2
+  exit 1
+fi
+
+bun run test && bun run test-gas && bun run lint
+
+status=$?
+
+exit $status

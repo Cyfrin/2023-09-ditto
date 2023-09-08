@@ -1,0 +1,12 @@
+#!/bin/sh
+
+changedFiles="$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)"
+
+runOnChange() {
+	echo "$changedFiles" | grep -q "$1" && echo "$2"
+}
+
+runOnChange bun.lockb "\n📦 bun.lockb changed. run bun install"
+bun run interfaces
+
+exit 0

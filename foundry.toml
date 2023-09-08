@@ -1,0 +1,105 @@
+[profile.default]
+solc-version = "0.8.21"
+evm_version = "shanghai"
+optimizer = false
+src = 'contracts'
+test = 'test'
+out = 'foundry/artifacts'
+cache_path = 'foundry/cache'
+script = 'deploy'
+broadcast = 'foundry/broadcast'
+fs_permissions = [
+  { access = "read", path = "./foundry/artifacts"},
+  { access = "read-write", path = "./test/invariants"}
+]
+# ignore contract size(5574), prevrandao(9432), & initcode size(3860) warnings for test
+ignored_error_codes = [5574, 9432, 3860]
+block_base_fee_per_gas = 1000000000
+
+# non-optimized fixture
+# [profile.fixture]
+# src = 'test/utils/OBFixture.sol'
+# test = 'test/utils/OBFixture.sol'
+# script = 'test/utils/OBFixture.sol'
+# out = 'foundry/artifacts-gas'
+# cache_path = 'foundry/cache'
+
+# only test
+[profile.forkgas]
+optimizer = true
+optimizer_runs = 100_000
+src = 'test-gas/fork'
+test = 'test-gas/fork'
+script = 'test-gas/fork'
+out = 'foundry/artifacts-gas'
+cache_path = 'foundry/cache-gas'
+fs_permissions = [
+  { access = "read", path = "./foundry/artifacts-gas"},
+  { access = "read-write", path = "./.forge-snapshots"},
+  { access = "read-write", path = "./.gas.json"}
+]
+ffi = true
+
+[profile.gas]
+# via_ir = true
+optimizer = true
+optimizer_runs = 100_000
+test = 'contracts'
+out = 'foundry/artifacts-gas'
+script = 'contracts'
+cache_path = 'foundry/cache-gas'
+fs_permissions = [
+  { access = "read", path = "./foundry/artifacts-gas"},
+  { access = "read-write", path = "./.forge-snapshots"},
+  { access = "read-write", path = "./.gas.json"}
+]
+ffi = true
+
+# non-optimized test files
+[profile.testgas]
+src = 'test/utils'
+test = 'test-gas'
+out = 'foundry/artifacts-gas'
+script = 'test-gas'
+cache_path = 'foundry/cache-gas'
+fs_permissions = [
+  { access = "read", path = "./foundry/artifacts-gas"},
+  { access = "read-write", path = "./.forge-snapshots"},
+  { access = "read-write", path = "./.gas.json"}
+]
+ffi = true
+
+[profile.deploy-local]
+fs_permissions = [
+  { access = "read", path = "./foundry/artifacts"},
+  { access = "read-write", path = "./.deploy-snapshots"}
+]
+ffi = true
+
+[profile.deploy-local-gas]
+via_ir = true
+optimizer = true
+optimizer_runs = 100_000
+test = 'contracts'
+out = 'foundry/artifacts-gas'
+script = 'deploy'
+cache_path = 'foundry/cache-gas'
+fs_permissions = [
+  { access = "read", path = "./foundry/artifacts-gas"},
+  { access = "read-write", path = "./.forge-snapshots"},
+  { access = "read-write", path = "./.deploy-snapshots"},
+  { access = "read-write", path = "./.gas.json"}
+]
+ffi = true
+
+[fmt]
+line_length = 90
+ignore = ["contracts/libraries/LibDiamond.sol"]
+
+[fuzz]
+runs = 50
+
+[invariant]
+runs = 10
+depth = 50
+fail_on_revert = false

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+BWHITE='\033[1;37m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+FOLDER=.forge-snapshots/ 
+
+printf "Editing gas snapshot... \n"
+if [ -d "$FOLDER" ]; then
+  if bun run gas &>/dev/null; then
+    printf "modified ${GREEN}.gas.json${NC} \n"
+    git add .gas.json
+  else
+    printf "${RED}error editing .gas.json${NC} \n"
+    exit 1
+  fi
+fi

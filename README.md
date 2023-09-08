@@ -88,6 +88,7 @@ Let's prioritize the core parts: orderbook functions (making orders: `createX`),
 Add a mainnet rpc url so you can run fork tests. 
 
 ```
+bun install
 bun run interfaces
 forge build
 echo 'ANVIL_9_PRIVATE_KEY=0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6' > .env && echo 'MAINNET_RPC_URL=XXXXX' >> .env

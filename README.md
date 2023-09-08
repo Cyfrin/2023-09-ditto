@@ -25,6 +25,7 @@
 # About the Project
 
 - [Docs](https://dittoeth.com/)
+- [Twitter](https://twitter.com/dittoproj)
 
 # OrderBook
 

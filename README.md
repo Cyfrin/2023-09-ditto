@@ -81,6 +81,36 @@ Let's prioritize the core parts: orderbook functions (making orders: `createX`),
 - facets/DiamondCutFacet.sol
 - facets/DiamondLoupeFacet.sol
 
+# Known Issues
+
+- Oracle is very dependent on Chainlink: similar to Liquity. stale/invalid prices fallback to uniswap TWAP. 2 hours staleness means it can be somewhat out of date
+- Oracle: non ETH/USD oracle assets currently have no Uniswap TWAP fallback, it reverts.
+- Need boostrap phase: when there are few shorts/TAPP is low, easy to fall into black swan scenario
+- Bootstrap for ditto rewards: first claimer gets 100% of ditto reward
+- Events: still adding core events, mostly admin events for now.
+- Not done with governance setup
+- Not finished with mainnet deployment setup
+
+## Known Considerations from previous stablecoin Codehawk report
+[https://www.codehawks.com/report/cljx3b9390009liqwuedkn0m0]
+
+- H-01: Collateral tokens < 18 decimals: Project assumes collateral tokens are 18 decimals because they will all specifically be ETH LSTs like rETH. stETH and rETH are both 18. diamondCut upgrade can be used otherwise. (see old reports)
+- H-02: Liquidation reverts: Liquidation shouldn't revert the due to lack of collateral or the extra liquidation fee/bonus because the TAPP can be used. Primary liquidation can revert if there are no orders, secondary liquidation doesn't have an associated fee
+- H-03: Liquidation of small shorts: Protocol attempts to cover liquidating small positions in a few ways: there is a minimum short amount upon creation, gas fee is paid by shorter not liquidator. Shorts with too small fee to get liquidated are also too small to effect the market with bad debt. If needed, the shutdownMarket can be called when market CR is < minimumCR to freeze that market and allow people to redeemErc. Worst case, TAPP/DAO can also secondary liquidate small positions
+- M-01: protocol is only planned to be on L1
+- M-02 stale price: stale period is intentionally set at 2 hours for Ethereum/mainnet for base oracle (ETH/USD), which fallsback to TWAP. For multi-asset oracle, considering adding a mapping to track different stale heartbeats (Gold is 24 hours)
+- M-03 revert if outside of min/max answer: Shouldn't happen for a feed like ETH/USD, but will add checks for minAnswer and maxAnswer according to chainlink docs
+- M-04 decimals: protocol assumes same decimals, not calling decimals() to save a SLOAD of gas. Can use diamond upgrade if needed for multi-asset if necessary.
+- M-05 burnFrom: protocol doesn't inherit OZ ERC20Burnable, just calls _burn directly with owner modifier.
+- M-06 duplicate inputs: protocol uses arrays for inputs for orderhints which isn't an issue, batches for secondary margin call (checks for deleted shorts), and combineShorts ids which checks deleted shorts
+- M-07 oracle fallback: protocol uses Uniswap TWAP
+- M-08 fee-on-transfer: protocol's bridges for reth/steth account checks for fees on deposit of eth into steth or reth by checking balanceOf. It doesn't do it for depositing the token itself, protocol assumes steth/reth won't add a fee on transfer.
+- M-09 liquidate revert: protocol can use TAPP
+- M-10 upgradable collateral: diamond upgradable, bridges are whitelisted already, will think about detecting upgrades
+- M-11 liquidate front run: No particular protections against frontrunning an order/liquidation, and oracle manipulation (unlikely for ETH/USD pair for both chainlink/uniswap)
+- M-12 dos liquidation: secondary liquidation doesn't need to be precise, can't be blocked
+
+
 # OrderBook
 
 ## Competition Setup

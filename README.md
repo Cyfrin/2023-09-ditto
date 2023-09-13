@@ -49,6 +49,7 @@ Let's prioritize the core parts: orderbook functions (making orders: `createX`),
 - [ ] facets/ExitShortFacet.sol
 - [ ] facets/ERC721Facet.sol (only care about `transferFrom`, `mintNFT` since the rest is standard OZ)
 - [ ] libraries/LibAsset.sol
+- [ ] libraries/LibVault.sol
 - [ ] libraries/LibOracle.sol
 - [ ] facets/VaultFacet.sol
 - [ ] facets/BridgeRouterFacet.sol

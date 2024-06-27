@@ -18,7 +18,7 @@
 - Dollars per Complexity: ~$33
 - Dollars per nSLOC: ~$16
 
-# About the Project
+## About the Project
 
 - [Docs](https://dittoeth.com/)
 - [Twitter](https://twitter.com/dittoproj)

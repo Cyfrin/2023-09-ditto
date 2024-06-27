@@ -1,11 +1,6 @@
 # Ditto 
 
-<!-- <br/>
-<p align="center">
-<img src="./logo.png" width="500" alt="Ditto">
-</p>
-<br/> --> 
-
+[//]: # (contest-details-open)
 
 ## Contest Details 
 
@@ -13,6 +8,7 @@
   - HM Awards: $50,000
   - Low Awards: $5,000
   - No GAS, Informational, or QAs
+
 - Starts September 8, 2023
 - Ends Oct 8th, 2023
 
@@ -27,7 +23,9 @@
 - [Docs](https://dittoeth.com/)
 - [Twitter](https://twitter.com/dittoproj)
 
-# OrderBook
+[//]: # (contest-details-close)
+
+[//]: # (scope-open)
 
 ## Scope (contracts)
 
@@ -82,6 +80,10 @@ Let's prioritize the core parts: orderbook functions (making orders: `createX`),
 - facets/DiamondCutFacet.sol
 - facets/DiamondLoupeFacet.sol
 
+[//]: # (scope-close)
+
+[//]: # (known-issues-open)
+
 # Known Issues
 
 - Oracle is very dependent on Chainlink: similar to Liquity. stale/invalid prices fallback to uniswap TWAP. 2 hours staleness means it can be somewhat out of date
@@ -111,10 +113,11 @@ Let's prioritize the core parts: orderbook functions (making orders: `createX`),
 - M-11 liquidate front run: No particular protections against frontrunning an order/liquidation, and oracle manipulation (unlikely for ETH/USD pair for both chainlink/uniswap)
 - M-12 dos liquidation: secondary liquidation doesn't need to be precise, can't be blocked
 
+[//]: # (known-issues-close)
 
-# OrderBook
+[//]: # (getting-started-open)
 
-## Competition Setup
+## Getting Started
 
 Add a mainnet rpc url so you can run fork tests. 
 
@@ -172,7 +175,7 @@ volta install node
 > https://book.getfoundry.sh/forge/writing-tests.html#writing-tests
 > For info on `v`, https://book.getfoundry.sh/forge/tests.html?highlight=vvvv#logs-and-traces
 
-## Get Started
+## Running
 
 ````sh
 bun run build
@@ -196,3 +199,5 @@ gm testA
 w -m testA
 ```
 ````
+
+[//]: # (getting-started-close)

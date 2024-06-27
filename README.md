@@ -84,7 +84,7 @@ Let's prioritize the core parts: orderbook functions (making orders: `createX`),
 
 [//]: # (known-issues-open)
 
-# Known Issues
+## Known Issues
 
 - Oracle is very dependent on Chainlink: similar to Liquity. stale/invalid prices fallback to uniswap TWAP. 2 hours staleness means it can be somewhat out of date
 - Oracle: non ETH/USD oracle assets currently have no Uniswap TWAP fallback, it reverts.

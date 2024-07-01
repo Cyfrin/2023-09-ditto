@@ -1,7 +1,5 @@
 # Ditto 
 
-[//]: # (contest-details-open)
-
 ## Contest Details 
 
 - Total Prize Pool: $55,000
@@ -17,6 +15,8 @@
 - Complexity Score: ~1682
 - Dollars per Complexity: ~$33
 - Dollars per nSLOC: ~$16
+
+[//]: # (contest-details-open)
 
 ## About the Project
 
